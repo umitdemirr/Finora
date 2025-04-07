@@ -3,7 +3,7 @@ CREATE DATABASE "Finora";
 \c "Finora"
 
 
-CREATE TABLE "User" (
+CREATE TABLE "Users" (
     "Id" SERIAL PRIMARY KEY,
     "FirstName" VARCHAR(100) NOT NULL,
     "LastName" VARCHAR(100) NOT NULL,
@@ -14,12 +14,12 @@ CREATE TABLE "User" (
     "CreateAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     "UpdateAt" TIMESTAMP NULL
 );
-CREATE TABLE "OperationClaim" (
+CREATE TABLE "OperationClaims" (
     "Id" SERIAL PRIMARY KEY,
     "Name" VARCHAR(100) NOT NULL UNIQUE,
     "Description" TEXT
 );
-CREATE TABLE "UserOperationClaim" (
+CREATE TABLE "UserOperationClaims" (
     "Id" SERIAL PRIMARY KEY,
     "UserId" INT NOT NULL REFERENCES "User"("Id") ON DELETE CASCADE,
     "OperationClaimId" INT NOT NULL REFERENCES "OperationClaim"("Id") ON DELETE CASCADE
@@ -69,14 +69,14 @@ CREATE TABLE "ExchangeRates" (
     "Rate" DECIMAL(18,6) NOT NULL,
     "Date" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE "Inflation" (
+CREATE TABLE "Inflations" (
     "Id" SERIAL PRIMARY KEY,
     "Country" VARCHAR(100) NOT NULL,
     "Year" INT NOT NULL,
     "Month" INT NOT NULL,
     "InflationRate" DECIMAL(5,2) NOT NULL
 );
-CREATE TABLE "StockAccount" (
+CREATE TABLE "StockAccounts" (
     "Id" SERIAL PRIMARY KEY,
     "UserId" INT NOT NULL,
     "ExchangeId" INT NOT NULL REFERENCES "BanksAndExchanges"("Id"),
@@ -106,7 +106,7 @@ CREATE TABLE "StockTransaction" (
 
 
 -- "User" tablosuna veri ekleme
-INSERT INTO "User" ("FirstName", "LastName", "Mail", "PasswordHash", "PasswordSalt", "Status") VALUES
+INSERT INTO "Users" ("FirstName", "LastName", "Mail", "PasswordHash", "PasswordSalt", "Status") VALUES
 ('Ahmet', 'Yılmaz', 'ahmet.yilmaz@example.com', '\x1234abcd', '\x5678ef12', TRUE),
 ('Ayşe', 'Kara', 'ayse.kara@example.com', '\x2345bcde', '\x6789fa34', TRUE),
 ('Mehmet', 'Demir', 'mehmet.demir@example.com', '\x3456cdef', '\x7890ab56', TRUE),
@@ -120,7 +120,7 @@ INSERT INTO "User" ("FirstName", "LastName", "Mail", "PasswordHash", "PasswordSa
 
 
 -- "OperationClaim" tablosuna veri ekleme
-INSERT INTO "OperationClaim" ("Name", "Description") VALUES
+INSERT INTO "OperationClaims" ("Name", "Description") VALUES
 ('Yönetici', 'Yönetici yetkileri'),
 ('Kullanıcı', 'Standart kullanıcı yetkileri'),
 ('Editör', 'İçerik düzenleme yetkileri'),
@@ -198,7 +198,7 @@ INSERT INTO "ExchangeRates" ("BaseCurrency", "TargetCurrency", "Rate") VALUES
 ('GBP', 'EUR', 1.12);
 
 -- "Inflation" tablosuna veri ekleme
-INSERT INTO "Inflation" ("Country", "Year", "Month", "InflationRate") VALUES
+INSERT INTO "Inflations" ("Country", "Year", "Month", "InflationRate") VALUES
 ('Türkiye', 2025, 1, 8.5),
 ('Türkiye', 2025, 2, 8.8),
 ('Türkiye', 2025, 3, 9.0),
@@ -211,7 +211,7 @@ INSERT INTO "Inflation" ("Country", "Year", "Month", "InflationRate") VALUES
 ('Çin', 2025, 1, 2.9);
 
 -- "StockAccount" tablosuna veri ekleme
-INSERT INTO "StockAccount" ("UserId", "ExchangeId", "AccountNo", "Balance", "Currency") VALUES
+INSERT INTO "StockAccounts" ("UserId", "ExchangeId", "AccountNo", "Balance", "Currency") VALUES
 (1, 3, 'TR9876543210', 1500.00, 'TRY'),
 (2, 5, 'TR1122334455', 2000.00, 'EUR'),
 (3, 7, 'TR5566778899', 1000.00, 'USD'),
