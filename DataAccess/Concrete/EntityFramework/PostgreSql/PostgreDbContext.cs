@@ -15,7 +15,8 @@ public class PostgreDbContext: DbContext
     public DbSet<OperationClaim> OperationClaims { get; set; }
     public DbSet<UserOperationClaim> UserOperationClaims { get; set; }
     public DbSet<BankAccount> BankAccounts { get; set; }
-    public DbSet<BankAndExchange> BankAndExchanges { get; set; }
+    public DbSet<Currency> Currencies { get; set; }
+    public DbSet<BankAndExchange> BanksAndExchanges { get; set; }
     public DbSet<BankCard> BankCards { get; set; }
     public DbSet<BankTransaction> BankTransactions { get; set; }
     public DbSet<ExchangeRate> ExchangeRates { get; set; }

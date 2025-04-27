@@ -23,6 +23,10 @@ public class AutofacBusinessModule : Module
         builder.RegisterType<BankAndExchangeManager>().As<IBankAndExchangeService>().SingleInstance();
         builder.RegisterType<EfBankAndExchangeDal>().As<IBankAndExchangeDal>().SingleInstance();
 
+        builder.RegisterType<CurrencyManager>().As<ICurrencyService>().SingleInstance();
+        builder.RegisterType<EfCurrencyDal>().As<ICurrencyDal>().SingleInstance();
+
+
         builder.RegisterType<BankCardManager>().As<IBankCardService>().SingleInstance();
         builder.RegisterType<EfBankCardDal>().As<IBankCardDal>().SingleInstance();
 
@@ -40,7 +44,6 @@ public class AutofacBusinessModule : Module
 
         builder.RegisterType<StockTransactionManager>().As<IStockTransactionService>().SingleInstance();
         builder.RegisterType<EfStockTransactionDal>().As<IStockTransactionDal>().SingleInstance();
-
 
         builder.RegisterType<AuthManager>().As<IAuthService>().SingleInstance();
         builder.RegisterType<JwtHelper>().As<ITokenHelper>().SingleInstance();
