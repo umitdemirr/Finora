@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300">
+  <!-- Profesyonel bir renk paleti: Koyu mavi, açık mavi, gri tonları -->
+  
+  <!-- Logo arka planı - yuvarlak form -->
+  <circle cx="150" cy="150" r="120" fill="#f7f7f7" />
+  
+  <!-- Ana şekil - F harfini anımsatan soyut form -->
+  <path d="M105 90 L195 90 L195 120 L135 120 L135 140 L180 140 L180 170 L135 170 L135 210" 
+        stroke="#2B5B84" 
+        stroke-width="16" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"
+        fill="none" />
+  
+  <!-- Grafiksel element - para/analiz/yükseliş teması -->
+  <path d="M160 150 L180 130 L200 170 L220 120" 
+        stroke="#4A96D3" 
+        stroke-width="10" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"
+        fill="none" />
+  
+  <!-- Dekoratif nokta - vurgu elemanı -->
+  <circle cx="220" cy="120" r="8" fill="#4A96D3" />
+</svg>
