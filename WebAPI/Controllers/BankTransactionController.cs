@@ -1,6 +1,5 @@
 ﻿using Business.Abstract;
 using Entities.Concrete;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers;
@@ -20,6 +19,17 @@ public class BankTransactionController : ControllerBase
     public IActionResult Get()
     {
         var result = _bankTransactionService.GetAll();
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+        return BadRequest(result);
+    }
+
+    [HttpGet("getdetail")]
+    public IActionResult GetDetail(int userId)
+    {
+        var result = _bankTransactionService.GetAllBankTransactionDetail(userId);
         if (result.Success)
         {
             return Ok(result);

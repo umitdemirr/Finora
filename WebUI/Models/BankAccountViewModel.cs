@@ -12,4 +12,7 @@ public class BankAccountViewModel
     public Result<List<BankAndExchange>>? BankList { get; set; }
     public Result<List<Currency>>? CurrencyList { get; set; }
 
+    public Result<List<BankAccountDetailDto>>? BankAccountDetailList { get; set; }
+    public BankAccountDetailDto? BankAccountDetail { get; set; }
+
 }

@@ -7,7 +7,9 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient();
-builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSettings"));
+builder.Services.AddScoped<TokenService>();
+builder.Services.AddScoped<BusinessService>();
+
 
 
 var app = builder.Build();

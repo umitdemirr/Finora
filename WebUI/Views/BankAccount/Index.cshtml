@@ -1,7 +1,6 @@
 ﻿@model BankAccountViewModel
 <link rel="stylesheet" href="~/css/dataTables.bootstrap4.css">
-<link rel="stylesheet" href="~/css/app-light.css" id="lightTheme">
-<link rel="stylesheet" href="~/css/app-dark.css" id="darkTheme">
+
 
 <div class="container-fluid">
     <div class="row justify-content-center">
@@ -34,19 +33,29 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var account in Model.BankAccountList.Data)
+                                    @foreach (var account in Model.BankAccountDetailList.Data)
                                     {
                                         <tr>
-                                            <td>@account.Id</td>
-                                            <td>@Model.BankList?.Data?.Where(i => i.Id == account.BankId).FirstOrDefault()?.Name</td>
-                                            <td>@account.Name</td>
-                                            <td>@Model.CurrencyList?.Data?.Where(c=> c.Id == account.CurrencyId).FirstOrDefault()?.Code</td>
-                                            <td>@account.AccountNo</td>
+                                            <td>@account.AccountId</td>
+                                            <td>@account.BankName</td>
+                                            <td>@account.AccountName</td>
+                                            <td>@account.CurrencyName</td>
+                                            <td>@account.Iban</td>
                                             <td>@account.Balance</td>
                                             <td>
-                                                <a class="btn btn-outline-light" style="color:lawngreen" data-toggle="modal" data-target="#updateModal" data-id="@account.Id"><i class="fe fe-edit-2"></i></a>
-                                                <a class="btn btn-outline-light" style="color:deepskyblue" data-toggle="modal" data-target="#accountHistory" data-id="@account.Id"><i class="fe fe-repeat"></i></a>
-                                                <a class="btn btn-outline-light" style="color:orangered" data-toggle="modal" data-target="#deleteModal" data-id="@account.Id"><i class="fe fe-trash"></i></a>
+                                                <a class="btn btn-outline-light" style="color:lawngreen"
+                                                   data-toggle="modal"
+                                                   data-target="#updateModal"
+                                                   data-id="@account.AccountId"
+                                                   data-name="@account.AccountName"
+                                                   data-bankid="@account.BankId"
+                                                   data-accountno="@account.Iban"
+                                                   data-balance="@account.Balance"
+                                                   data-currencyid="@account.CurrencyId">
+                                                    <i class="fe fe-edit-2"></i>
+                                                </a>
+                                                <a class="btn btn-outline-light" style="color:deepskyblue" data-toggle="modal" data-target="#accountHistory" data-id="@account.AccountId"><i class="fe fe-repeat"></i></a>
+                                                <a class="btn btn-outline-light" style="color:orangered" data-toggle="modal" data-target="#deleteModal" data-id="@account.AccountId"><i class="fe fe-trash"></i></a>
                                             </td>
                                         </tr>
                                     }
@@ -82,7 +91,10 @@
                                             <option value="">Banka Seçin...</option>
                                             @foreach (var bank in Model.BankList.Data)
                                             {
-                                                <option value="@bank.Id">@bank.Name</option>
+                                                @if (bank.Type == "Banka")
+                                                {
+                                                    <option value="@bank.Id">@bank.Name</option>
+                                                }
                                             }
                                         </select>
                                     </div>
@@ -95,7 +107,7 @@
                                 <div class="form-row">
                                     <div class="form-group col-md-5">
                                         <label>IBAN*</label>
-                                        <input asp-for="BankAccount.AccountNo" class="form-control" placeholder="TR12345678912345" required />
+                                        <input asp-for="BankAccount.AccountNo" class="form-control input-iban" placeholder="TR" required />
                                     </div>
                                     <div class="form-group col-md-4">
                                         <label>Bakiye*</label>
@@ -142,13 +154,11 @@
                     <div class="container-fluid">
                         <div class="row justify-content-center">
                             <div class="col-12 col-xl-10">
-
-                                <input type="hidden" name="BankAccount.Id" />
-
+                                <input type="hidden" name="BankAccount.Id" id="updateAccountId" />
                                 <div class="form-row">
                                     <div class="form-group col-md-5">
                                         <label>Banka*</label>
-                                        <select name="BankAccount.BankId" class="form-control" required>
+                                        <select name="BankAccount.BankId" class="form-control" id="updateBankId" required>
                                             <option value="">Banka Seçin...</option>
                                             @foreach (var bank in Model.BankList.Data)
                                             {
@@ -158,22 +168,21 @@
                                     </div>
                                     <div class="form-group col-md-7">
                                         <label>Hesap Adı*</label>
-                                        <input name="BankAccount.Name" class="form-control" required />
+                                        <input name="BankAccount.Name" id="updateAccountName" class="form-control" required />
                                     </div>
                                 </div>
-
                                 <div class="form-row">
                                     <div class="form-group col-md-5">
                                         <label>IBAN*</label>
-                                        <input name="BankAccount.AccountNo" class="form-control" required />
+                                        <input name="BankAccount.AccountNo" id="updateAccountNo" class="form-control" required />
                                     </div>
                                     <div class="form-group col-md-4">
                                         <label>Bakiye*</label>
-                                        <input name="BankAccount.Balance" class="form-control input-money" required />
+                                        <input name="BankAccount.Balance" id="updateBalance" class="form-control input-money" required />
                                     </div>
                                     <div class="form-group col-md-3">
                                         <label>Para Birimi*</label>
-                                        <select name="BankAccount.CurrencyId" class="form-control" required>
+                                        <select name="BankAccount.CurrencyId" class="form-control" id="updateCurrencyId" required>
                                             <option value="">Seçin...</option>
                                             @foreach (var currency in Model.CurrencyList.Data)
                                             {
@@ -183,7 +192,6 @@
                                     </div>
                                 </div>
                                 <div class="help-text text-muted">(*) Zorunlu alan</div>
-
                             </div>
                         </div>
                     </div>
@@ -270,20 +278,22 @@
 
 
     // Güncelleme modalını doldur
-    var bankAccounts = @Html.Raw(Json.Serialize(Model.BankAccountList.Data));
-        $(document).on('click', '[data-target="#updateModal"]', function () {
-        var id = $(this).data('id');
-        var selected = bankAccounts.find(x => x.id === id);
+       $('#updateModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget); // Tıklanan buton
+        var modal = $(this);
 
-        if (!selected) {
-            console.error("Hesap bulunamadı");
-            return;
-        }
-        $('#updateModal input[name="BankAccount.Name"]').val(selected.name);
-        $('#updateModal input[name="BankAccount.AccountNo"]').val(selected.accountNo);
-        $('#updateModal input[name="BankAccount.Balance"]').val(selected.balance);
-        $('#updateModal select[name="BankAccount.BankId"]').val(selected.bankId);
-        $('#updateModal select[name="BankAccount.CurrencyId"]').val(selected.currencyId);
-        $('#updateModal input[name="BankAccount.Id"]').val(selected.id);
+        var id = button.data('id');
+        var name = button.data('name');
+        var bankid = button.data('bankid');
+        var accountno = button.data('accountno');
+        var balance = button.data('balance');
+        var currencyid = button.data('currencyid');
+
+        modal.find('#updateAccountId').val(id);
+        modal.find('#updateAccountName').val(name);
+        modal.find('#updateBankId').val(bankid);
+        modal.find('#updateAccountNo').val(accountno);
+        modal.find('#updateBalance').val(balance);
+        modal.find('#updateCurrencyId').val(currencyid);
     });
 </script>

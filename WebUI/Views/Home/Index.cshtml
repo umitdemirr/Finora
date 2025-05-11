@@ -1,0 +1,329 @@
+﻿@model HomeViewModel
+
+<div class="row justify-content-center">
+    <div class="col-12">
+        <div class="row align-items-center mb-2">
+            <div class="col">
+                <h2 class="h5 page-title">Ana Sayfa</h2>
+            </div>
+            <div class="col-auto">
+                <div class="d-flex">
+                    <select class="custom-select mr-2">
+                        <option value="30" selected>Son 30 Gün</option>
+                        <option value="7">Bu Hafta</option>
+                        <option value="30">Bu Ay</option>
+                        <option value="365">Bu Yıl</option>
+                        <option value="1825">Son 5 Yıl</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Özet Kartları -->
+        <div class="row my-4">
+            <div class="col-md-3">
+                <div class="card shadow mb-4">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <small class="text-muted mb-1">Toplam Varlık</small>
+                                <h3 class="card-title mb-0">₺@Model.TotalMoney?.ToString("N2")</h3>
+                                <p class="small text-muted mb-0"><span class="fe fe-arrow-up fe-12 text-success"></span><span class="text-success">+3.5%</span></p>
+                            </div>
+                            <div class="col-auto">
+                                <span class="fe fe-dollar-sign fe-32 text-muted"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow mb-4">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <small class="text-muted mb-1">Toplam Gelir</small>
+                                <h3 class="card-title mb-0">₺@Model.TotalIncome?.ToString("N2")</h3>
+                                <p class="small text-muted mb-0"><span class="fe fe-arrow-up fe-12 text-success"></span><span class="text-success">+2.8%</span></p>
+                            </div>
+                            <div class="col-auto">
+                                <span class="fe fe-trending-up fe-32 text-muted"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow mb-4">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <small class="text-muted mb-1">Toplam Gider</small>
+                                <h3 class="card-title mb-0">₺@Model.TotalExpanse?.ToString("N2")</h3>
+                                <p class="small text-muted mb-0"><span class="fe fe-arrow-down fe-12 text-danger"></span><span class="text-danger">-1.2%</span></p>
+                            </div>
+                            <div class="col-auto">
+                                <span class="fe fe-trending-down fe-32 text-muted"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow mb-4">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <small class="text-muted mb-1">Net Kalan</small>
+                                <h3 class="card-title mb-0">₺@Model.NetWorth?.ToString("N2")</h3>
+                                <p class="small text-muted mb-0"><span class="fe fe-arrow-up fe-12 text-success"></span><span class="text-success">+8.3%</span></p>
+                            </div>
+                            <div class="col-auto">
+                                <span class="fe fe-bar-chart-2 fe-32 text-muted"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grafikler -->
+        <div class="row">
+            <!-- Gelir/Gider Grafiği -->
+<div class="col-md-6 mb-4">
+    <div class="card shadow">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <strong class="card-title mb-0">Gelir/Gider Grafiği</strong>
+            <div class="btn-group" role="group" aria-label="Zaman Filtreleri" id="filterButtons">
+                <a class="btn btn-outline-secondary btn-sm" href='@Url.Action("Index", "Home", new { range = 1 })'>Bugün</a>
+                <a class="btn btn-outline-secondary btn-sm" href='@Url.Action("Index", "Home", new { range = 7 })'>1 Hafta</a>
+                <a class="btn btn-outline-secondary btn-sm" href='@Url.Action("Index", "Home", new { range = 30 })'>1 Ay</a>
+                <a class="btn btn-outline-secondary btn-sm" href='@Url.Action("Index", "Home", new { range = 180 })'>6 Ay</a>
+                <a class="btn btn-outline-secondary btn-sm" href='@Url.Action("Index", "Home", new { range = 365 })'>1 Yıl</a>
+            </div>
+        </div>
+        <div class="card-body">
+            <canvas id="gelirGider" width="733" height="300"></canvas>
+        </div>
+    </div>
+</div>
+
+            <!-- Varlık Dağılımı -->
+            <div class="col-md-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <strong>Varlık Dağılımı</strong>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-box">
+                            <canvas id="assetDistributionChart" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Son İşlemler -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <strong class="card-title">Son İşlemler</strong>
+                        <a class="float-right small text-muted" href="/BankTransaction/Index">Tümünü Gör</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush my-n3">
+
+                            @foreach (var transaction in Model.BankTransactions.Data.TakeLast(3))
+                            {
+                                if (transaction.TransactionType == "Gelir")
+                                {
+                                    <div class="list-group-item">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                <span class="fe fe-arrow-up-circle fe-24 text-success"></span>
+                                            </div>
+                                            <div class="col">
+                                                <small><strong>@transaction.Description</strong></small>
+                                                <div class="my-0 text-muted small">@transaction.Date</div>
+                                            </div>
+                                            <div class="col-auto">
+                                                <strong class="text-success">+ @transaction.Amount.ToString("N2")</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                                if (transaction.TransactionType == "Gider")
+                                {
+                                    <div class="list-group-item">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                <span class="fe fe-arrow-down-circle fe-24 text-danger"></span>
+                                            </div>
+                                            <div class="col">
+                                                <small><strong>@transaction.Description</strong></small>
+                                                <div class="my-0 text-muted small">@transaction.Date</div>
+                                            </div>
+                                            <div class="col-auto">
+                                                <strong class="text-danger">- @transaction.Amount.ToString("N2")</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+ const crosshairPlugin = {
+     id: 'crosshair',
+     afterEvent(chart, args) {
+         const {event} = args;
+         chart._mouseX = event.x;
+         chart._mouseY = event.y;
+     },
+     afterDraw(chart) {
+         const {ctx, chartArea: {top, bottom, left, right}} = chart;
+         const x = chart._mouseX;
+         const y = chart._mouseY;
+
+         if (x >= left && x <= right && y >= top && y <= bottom) {
+             ctx.save();
+             ctx.setLineDash([5, 1]);
+             ctx.beginPath();
+             ctx.moveTo(x, top);
+             ctx.lineTo(x, bottom);
+             ctx.moveTo(left, y);
+             ctx.lineTo(right, y);
+             ctx.lineWidth = 1;
+             ctx.strokeStyle = "#999";
+             ctx.stroke();
+             ctx.restore();
+         }
+     }
+ };
+    document.getElementById("filterButtons").addEventListener("click", function (event) {
+        if (event.target.tagName === "BUTTON") {
+            let range = event.target.getAttribute("data-range");
+            updateChartData(range);
+        }
+    });
+    let chart = null;
+    function updateChartData(range) {
+        const labels = @Html.Raw(Json.Serialize(Model.Labels)); // Veriyi Controller'dan alıyoruz
+        const gelirler = @Html.Raw(Json.Serialize(Model.Gelirler));
+        const giderler = @Html.Raw(Json.Serialize(Model.Giderler));
+
+        // Filtreleme işlemi
+        const filteredLabels = [];
+        const filteredGelirler = [];
+        const filteredGiderler = [];
+        const today = new Date();
+        const filterDate = (dateString) => {
+            const date = new Date(dateString);
+            switch (range) {
+                case '1':
+                    return date.toDateString() === today.toDateString();
+                case '7':
+                    return (today - date) <= (7 * 24 * 60 * 60 * 1000);
+                case '30':
+                    return (today - date) <= (30 * 24 * 60 * 60 * 1000);
+                case '180':
+                    return (today - date) <= (180 * 24 * 60 * 60 * 1000);
+                case '365':
+                    return (today - date) <= (365 * 24 * 60 * 60 * 1000);
+                default:
+                    return true;
+            }
+        };
+
+        for (let i = 0; i < labels.length; i++) {
+            const dateLabel = new Date(labels[i]);
+            if (filterDate(dateLabel)) {
+                filteredLabels.push(labels[i]);
+                filteredGelirler.push(gelirler[i]);
+                filteredGiderler.push(giderler[i]);
+            }
+        }
+        if (chart) {chart.destroy();}
+
+        chart = new Chart(document.getElementById("gelirGider"), {
+            type: 'line',
+            data: {
+                labels: filteredLabels,
+                datasets: [
+                    {
+                        label: 'Gelir',
+                        borderColor: '#3ad29f',
+                        backgroundColor: '#3ad29f',
+                        data: filteredGelirler,
+                        fill: false,
+                        tension: 0,
+                        pointRadius: 0
+                    },
+                    {
+                        label: 'Gider',
+                        borderColor: '#dc3545',
+                        backgroundColor: '#dc3545',
+                        data: filteredGiderler,
+                        fill: false,
+                        tension: 0,
+                        pointRadius: 0
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                interaction: {
+                    mode: 'nearest',
+                    intersect: false
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    tooltip: {
+                        enabled: true,
+                        mode: 'nearest',
+                        intersect: false
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { display: false }
+                    }
+                }
+            },
+            plugins: [crosshairPlugin]
+        });
+    }
+    updateChartData(30);
+
+ // Varlık Dağılımı Grafiği
+ var assetDistributionChart = new Chart(document.getElementById('assetDistributionChart'), {
+     type: 'doughnut',
+     data: {
+         labels: ['Nakit', 'Hisse Senetleri', 'Kripto', 'Gayrimenkul'],
+         datasets: [{
+             data: [10, 45, 15, 30],
+             backgroundColor: ['#3498db', '#2ecc71', '#f1c40f', '#9b59b6']
+         }]
+     },
+     options: {
+         responsive: true,
+         maintainAspectRatio: false
+     }
+ });
+</script>

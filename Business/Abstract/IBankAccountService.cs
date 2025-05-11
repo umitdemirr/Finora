@@ -1,6 +1,6 @@
-﻿using Core.Entities.Concrete;
-using Core.Utilities.Results;
+﻿using Core.Utilities.Results;
 using Entities.Concrete;
+using Entities.DTOs;
 using System.Linq.Expressions;
 
 namespace Business.Abstract;
@@ -11,4 +11,5 @@ public interface IBankAccountService
     IResult Add(BankAccount bankAccount);
     IResult Update(BankAccount bankAccount);
     IResult Delete(BankAccount bankAccount);
+    IDataResult<List<BankAccountDetailDto>> GetAllBankAccountDetail();
 }

@@ -35,10 +35,8 @@ public class UserManager : IUserService
         _userDal.Add(user);
         return new SuccessResult(Messages.UserAdded);
     }
-
     public IResult Delete(User user)
     {
-
         _userDal.Delete(user);
         return new SuccessResult(Messages.UserDeleted);
     }
@@ -48,14 +46,10 @@ public class UserManager : IUserService
     {
         return new SuccessDataResult<List<User>>(_userDal.GetAll(filter),Messages.UsersList);
     }
-
-
     public List<OperationClaim> GetClaims(User user)
     {
         return _userDal.GetClaims(user);
     }
-
-
     public IResult Update(User user)
     {
         _userDal.Update(user);

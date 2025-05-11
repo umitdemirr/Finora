@@ -3,6 +3,7 @@ using Business.Constants;
 using Core.Utilities.Results;
 using DataAccess.Abstract;
 using Entities.Concrete;
+using Entities.DTOs;
 using System.Linq.Expressions;
 
 namespace Business.Concrete;
@@ -30,6 +31,12 @@ public class BankCardManager : IBankCardService
     {
         return new SuccessDataResult<List<BankCard>>(_bankCardDal.GetAll(filter), Messages.UsersList);
     }
+
+    public IDataResult<List<BankCardDetailDto>> GetAllBankCardDetailByUserId(int userId)
+    {
+        return new SuccessDataResult<List<BankCardDetailDto>>(_bankCardDal.GetAllBankCardDetailByUserId(userId), Messages.UsersList);
+    }
+
     public IResult Update(BankCard bankCard)
     {
         _bankCardDal.Update(bankCard);

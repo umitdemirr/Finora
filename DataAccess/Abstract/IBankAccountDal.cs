@@ -1,9 +1,10 @@
 ﻿using Core.DataAccess;
-using Core.Entities.Concrete;
 using Entities.Concrete;
+using Entities.DTOs;
 
 namespace DataAccess.Abstract;
 
 public interface IBankAccountDal : IEntityRepository<BankAccount>
 {
+    List<BankAccountDetailDto> GetAllBankAccountDetail();
 }

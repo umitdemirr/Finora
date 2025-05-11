@@ -1,0 +1,490 @@
+﻿@model BankTransactionViewModel
+<link rel="stylesheet" href="~/css/dataTables.bootstrap4.css">
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-12">
+            <div class="row align-items-center my-4">
+                <div class="col">
+                    <h2 class="h3 mb-0 page-title">Hesap Hareketleri</h2>
+                </div>
+                <div class="col-auto">
+                    <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#addRequestModal">
+                        <span class="fe fe-plus mr-2"></span>Ekle
+                    </button>
+                </div>
+            </div>
+
+            <div class="row my-4">
+                <div class="col-md-12">
+                    <div class="card shadow">
+                        <div class="card-body">
+                            <table class="table datatables" id="dataTable-1">
+                                <thead>
+                                    <tr>
+                                        <th>Id</th>
+                                        <th>Hesap Adı</th>
+                                        <th>Kategori</th>
+                                        <th>Ödeme Kanalı</th>
+                                        <th>İşlem Tutarı</th>
+                                        <th>Para Birimi</th>
+                                        <th>Açıklama</th>
+                                        <th>İşlem Yönü</th>
+                                        <th>İşlem Tarihi</th>
+                                        <th>İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var transaction in Model.BankTransactionList.Data)
+                                    {
+                                        <tr>
+                                            <td>@transaction.Id</td>
+                                            @if (transaction.PaymentType == "Kredi Kartı")
+                                            {
+                                                foreach (var card in Model.CreditCardList.Data)
+                                                {
+                                                    if (card.Id == transaction.AccountId)
+                                                    {
+                                                        <td>@card.Name</td>
+                                                    }
+                                                }
+                                            }
+                                            else if (transaction.PaymentType == "Banka Kartı")
+                                            {
+                                                foreach (var card in Model.BankCardList.Data)
+                                                {
+                                                    if (card.Id == transaction.AccountId)
+                                                    {
+                                                        <td>@card.Name</td>
+                                                    }
+                                                    
+                                                }
+                                            }
+                                            else if (transaction.PaymentType == "Eft- Fast" || transaction.PaymentType == "Havale")
+                                            {
+                                                foreach (var account in Model.BankAccountList.Data)
+                                                {
+                                                    if (account.Id == transaction.AccountId)
+                                                    {
+                                                        <td>@account.Name</td>
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <td>Nakit</td>
+                                            }
+                                            <td>@transaction.Category</td>
+                                            <td>@transaction.PaymentType</td>
+                                            @if (transaction.TransactionType == "Gelir")
+                                            {
+                                                <td style="color:#3ad29f">+ @transaction.Amount</td>
+
+                                            }
+                                            @if (transaction.TransactionType == "Gider")
+                                            {
+                                                <td style="color:#dc3545;">- @transaction.Amount</td>
+
+                                            }
+                                            <td>@transaction.Currency</td>
+                                            <td>@transaction.Description</td>
+                                            @if (transaction.TransactionType == "Gelir")
+                                            {
+                                                <td style="color:#3ad29f"><span class="fe fe-arrow-up-circle fe-16 text-success"></span> @transaction.TransactionType</td>
+                                                
+                                            }
+                                            @if (transaction.TransactionType == "Gider")
+                                            {
+                                                <td style="color:#dc3545;"><span class="fe fe-arrow-down-circle fe-16 text-danger"></span> @transaction.TransactionType</td>
+
+                                            }
+                                            <td>@transaction.Date</td>
+                                            <td>
+                                                <a class="btn btn-outline-light" style="color:lawngreen" data-toggle="modal" data-target="#updateModal" data-id="@transaction.Id"><i class="fe fe-edit-2"></i></a>
+                                                <a class="btn btn-outline-light" style="color:deepskyblue" data-toggle="modal" data-target="#accountHistory" data-id="@transaction.Id"><i class="fe fe-repeat"></i></a>
+                                                <a class="btn btn-outline-light" style="color:orangered" data-toggle="modal" data-target="#deleteModal" data-id="@transaction.Id"><i class="fe fe-trash"></i></a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Ekleme Modal -->
+<div class="modal fade" id="addRequestModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <strong>Hesap Hareketi Ekle</strong>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="card-body">
+                <ul class="nav nav-pills mb-3" id="pills-tab2" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="pills-home-tab1" data-toggle="pill" href="#pills1" role="tab" aria-controls="pills1" aria-selected="true">
+                            <span class="fe fe-16 fe-credit-card"></span> Kredi Kartı
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="pills-profile-tab2" data-toggle="pill" href="#pills2" role="tab" aria-controls="pills2" aria-selected="false">
+                            <span class="fe fe-16 fe-credit-card"></span> Banka Kartı
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="pills-contact-tab3" data-toggle="pill" href="#pills3" role="tab" aria-controls="pills3" aria-selected="false">
+                            <span class="fe fe-16 fe-coffee"></span> Banka Hesabı
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="pills-tabContent2">
+                    <!-- Kredi Kartı Formu -->
+                    <div class="tab-pane fade show active" id="pills1" role="tabpanel">
+                        <form asp-action="Add" asp-controller="BankTransaction" method="post">
+                            <div class="form-row">
+                                <div class="form-group col-md-4">
+                                    <label>Kredi Kartı</label>
+                                    <input name="BankTransaction.PaymentType" type="hidden" value="Kredi Kartı"/>
+                                    <select name="BankTransaction.AccountId" class="form-control" required>
+                                        <option value="">Kredi Kartı Seçin...</option>
+                                        @foreach (var card in Model.CreditCardList.Data)
+                                        {
+
+                                            <option value="@card.Id">@card.Name (**** @card.Number.Substring(@card.Number.Length - 4))</option>
+
+                                        }
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label for="kategori2">Kategori</label>
+                                    <select name="BankTransaction.Category" id="kategori2" class="form-control" required>
+                                        <option selected disabled>Seçin...</option>
+                                        <option value="E-ticaret">E-ticaret</option>
+                                        <option value="Vergi">Vergi</option>
+                                        <option value="Eğlence">Eğlence</option>
+                                        <option value="Market">Market</option>
+                                        <option value="Akaryakıt">Akaryakıt</option>
+                                        <option value="Fatura">Fatura</option>
+                                        <option value="Sağlık">Sağlık</option>
+                                        <option value="Diğer">Diğer</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label>Tutar</label>
+                                    <input name="BankTransaction.Amount" class="form-control input-money" required />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Açıklama</label>
+                                <textarea name="BankTransaction.Description" class="form-control" rows="2"></textarea>
+                            </div>
+                            <div class="card-footer text-right">
+                                <button type="submit" class="btn btn-primary">Kaydet</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Banka Kartı Formu -->
+                    <div class="tab-pane fade" id="pills2" role="tabpanel">
+                        <form asp-action="Add" asp-controller="BankTransaction" method="post">
+                            <div class="form-row">
+                                <div class="form-group col-md-4">
+                                    <label>Banka Kartı</label>
+                                    <input name="BankTransaction.PaymentType" type="hidden" value="Banka Kartı" />
+                                    <select name="BankTransaction.AccountId" class="form-control" required>
+                                        <option value="">Banka Kartı Seçin...</option>
+                                        @foreach (var card in Model.BankCardList.Data)
+                                        {
+                                            <option value="@card.Id">@card.Name (**** @card.Number.Substring(@card.Number.Length - 4))</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label for="kategori2">Kategori</label>
+                                    <select name="BankTransaction.Type" id="kategori2" class="form-control" required>
+                                        <option selected disabled>Seçin...</option>
+                                        <option value="E-ticaret">E-ticaret</option>
+                                        <option value="Vergi">Vergi</option>
+                                        <option value="Eğlence">Eğlence</option>
+                                        <option value="Market">Market</option>
+                                        <option value="Akaryakıt">Akaryakıt</option>
+                                        <option value="Fatura">Fatura</option>
+                                        <option value="Sağlık">Sağlık</option>
+                                        <option value="İade">İade</option>
+                                        <option value="Diğer">Diğer</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label>Tutar</label>
+                                    <input name="BankTransaction.Amount" class="form-control input-money" required />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Açıklama</label>
+                                <textarea name="BankTransaction.Description" class="form-control" rows="2"></textarea>
+                            </div>
+                            <div class="card-footer text-right">
+                                <button type="submit" class="btn btn-primary">Kaydet</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Banka Hesabı Formu -->
+                    <div class="tab-pane fade" id="pills3" role="tabpanel">
+                        <form asp-action="Add" asp-controller="BankTransaction" method="post">
+                            <div class="form-row">
+                                <div class="form-group col-md-4">
+                                    <label>Banka Hesabı</label>
+                                    <input name="BankTransaction.PaymentType" type="hidden" value="Banka Hesabı" />
+                                    <select name="BankTransaction.AccountId" class="form-control" required>
+                                        <option value="">Banka Hesabı Seçin...</option>
+                                        @foreach (var account in Model.BankAccountList.Data)
+                                        {
+                                            <option value="@account.Id">@account.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label for="kategori3">Kategori</label>
+                                    <select name="BankTransaction.Category" id="kategori3" class="form-control" required>
+                                        <option selected disabled>Seçin...</option>
+                                        <option value="Havale">Havale</option>
+                                        <option value="Eft">Eft</option>
+                                        <option value="Fast">Fast</option>
+                                        <option value="Fatura">Fatura</option>
+                                        <option value="Vergi">Vergi</option>
+                                        <option value="Vergi">Vergi</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label for="kategori3">İşlem Yönü</label>
+                                    <select name="BankTransaction.TransactionType" id="kategori3" class="form-control" required>
+                                        <option selected disabled>Seçin...</option>
+                                        <option value="Gelir">Gelir</option>
+                                        <option value="Gider">Gider</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>Tutar</label>
+                                    <input name="BankTransaction.Amount" class="form-control input-money" required />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Açıklama</label>
+                                <textarea name="BankTransaction.Description" class="form-control" rows="2"></textarea>
+                            </div>
+                            <div class="card-footer text-right">
+                                <button type="submit" class="btn btn-primary">Kaydet</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer text-right">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Güncelleme Modalı -->
+<div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true" data-keyboard="false">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content card my-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <strong>Kart Bilgilerini Güncelle</strong>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <form action="@Url.Action("Update", "BankTransaction")" method="post">
+                <div class="card-body">
+                    <div class="container-fluid">
+                        <div class="row justify-content-center">
+                            <div class="col-12 col-xl-10">
+                                <input asp-for="BankTransaction.Id" id="updateId" type="hidden">
+                                <div class="form-row">
+                                    <div class="form-group col-md-3">
+                                        <label>Banka*</label>
+                                        <select name="Card.BankId" id="updateBankId" class="form-control" required>
+                                            <option value="">Banka Seçin...</option>
+                                            @foreach (var bank in Model.BankTransactionList.Data)
+                                            {
+                                                @if (bank.Category == "Banka")
+                                                {
+                                                    <option value="@bank.Id">@bank.Category</option>
+                                                }
+
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label for="custom-ipadd">Kart Numarası</label>
+                                        <input asp-for="BankTransaction.Id" class="form-control input-creditcard" id="updateCardNumber" placeholder="____-____-____-____" maxlength="16">
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label for="inputState5">Kart Tipi</label>
+                                        <select name="Card.CardType" id="updateCardType" class="form-control">
+                                            <option selected="">Seçin...</option>
+                                            <option value="Kredi Kartı">Kredi Kartı</option>
+                                            <option value="Banka Kartı">Banka Kartı</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label for="inputState5">Sağlayıcı Ağ</label>
+                                        <select name="Card.CardNetwork" id="updateCardNetwork" class="form-control">
+                                            <option selected="">Seçin...</option>
+                                            <option value="Mastercard">Mastercard</option>
+                                            <option value="VISA">VISA</option>
+                                            <option value="TROY">TROY</option>
+                                            <option value="Paypal">Paypal</option>
+                                            <option value="American Express">American Express</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-md-3">
+                                        <label>SKT</label>
+                                        <input asp-for="BankTransaction.Id" id="updateExpiryDate" class="form-control input-card-skt" placeholder="10/2029" required />
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label>CVV</label>
+                                        <input asp-for="BankTransaction.Id" id="updateCvv" class="form-control input-card-cvv" required />
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label for="paraBirimi">Limit</label>
+                                        <input asp-for="BankTransaction.Id" id="updateCardLimit" class="form-control input-money" required />
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label for="paraBirimi">Kalan Limit</label>
+                                        <input asp-for="BankTransaction.Id" id="updateAvaliableCardLimit" class="form-control input-money" required />
+                                    </div>
+                                </div>
+                                <div class="help-text text-muted">(*) Zorunlu alan</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-outline-success">
+                        <span class="fe fe-send mr-2"></span>Kaydet
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- Silme Modalı -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteLabel">Kart Sil</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">Sistemde kayıtlı işleminizi silmek üzeresiniz. Silmek istediğinizden emin misiniz?</div>
+
+            <form method="post" asp-controller="BankTransaction" asp-action="Delete">
+                <input type="hidden" id="deleteId" name="id" value="" />
+                <div class="modal-footer">
+                    <button type="button" class="btn mb-2 btn-light" data-dismiss="modal">Kapat</button>
+                    <button type="submit" class="btn mb-2 btn-outline-danger">Hesabımı Sil</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- Hesap Hareketleri Modalı -->
+<div class="modal fade bd-example-modal-xl" id="accountHistory" tabindex="-1" role="dialog" aria-labelledby="myExtraLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="card my-4 modal-content">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <strong>Hesap Hareketleri</strong>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="card-body" data-simplebar="init" style="height:750px; overflow-y: auto; overflow-x: hidden;">
+                <h6 class="text-uppercase text-muted mb-4">Bugün</h6>
+                <div class="pb-3 timeline-item item-primary">
+                    <div class="pl-5">
+                        <div class="mb-1"><strong>Emre Demir</strong><span class="text-muted small mx-2">adlı kişiye 100 TL para transferi yapıldı</span><strong>PARA TRANSFERİ</strong></div>
+                        <p class="small text-muted">
+                            Tarih <span class="badge badge-light">22 Nisan 2025 17:40:19</span>
+                        </p>
+                    </div>
+                </div>
+                <div class="pb-3 timeline-item item-warning">
+                    <div class="pl-5">
+                        <div class="mb-1"><strong>Sedef Polat</strong><span class="text-muted small mx-2">adlı kişiye 100 TL para transferi yapıldı</span><strong>PARA TRANSFERİ</strong></div>
+                        <p class="small text-muted">
+                            Tarih <span class="badge badge-light">22 Nisan 2025 17:40:19</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    // Silme modalına id gönder
+    $(document).ready(function () {
+        $('#deleteModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var accountId = button.data('id');
+            var modal = $(this);
+            var hiddenInput = modal.find('#deleteId');
+            hiddenInput.val(accountId);
+        });
+    });
+    // Güncelleme modalını doldur
+    var cards = @Html.Raw(Json.Serialize(Model.BankTransactionList.Data));
+    $(document).on('click', '[data-target="#updateModal"]', function () {
+        var id = $(this).data('id');
+        var selected = cards.find(x => x.id === id);
+
+        if (!selected) {
+            console.error("Kart bulunamadı");
+            return;
+        }
+        $('#updateModal select[name="Card.BankId"]').val(selected.bankId);
+        $('#updateModal select[name="Card.CardType"]').val(selected.cardType);
+        $('#updateModal select[name="Card.CardNetwork"]').val(selected.cardNetwork);
+        $('#updateModal input[name="Card.CardNetwork"]').val(selected.cardNetwork);
+        $('#updateModal input[name="Card.ExpiryDate"]').val(selected.expiryDate);
+        $('#updateModal input[name="Card.CVV"]').val(selected.cvv);
+        $('#updateModal input[name="Card.CardLimit"]').val(selected.cardLimit);
+        $('#updateModal input[name="Card.AvaliableCardLimit"]').val(selected.avaliableCardLimit);
+        $('#updateModal input[name="Card.CardNumber"]').val(selected.cardNumber);
+    });
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

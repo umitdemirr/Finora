@@ -1,14 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   StyleSheet, Text, View, TextInput, TouchableOpacity,
-  KeyboardAvoidingView, Platform, Animated, ActivityIndicator, Alert
+  KeyboardAvoidingView, Platform, Animated, ActivityIndicator, Alert, SafeAreaView, StatusBar
 } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createDrawerNavigator, DrawerItemList } from '@react-navigation/drawer';
-import { StatusBar } from 'expo-status-bar';
+import HomeScreen from './src/screens/HomeScreen';
 import axios from 'axios';
-
 
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -17,7 +16,6 @@ function HomeScreen({ navigation }) {
   return (
     <View style={homeStyles.container}>
       <TouchableOpacity
-        onPress={() => navigation.openDrawer()}
         style={homeStyles.menuButton}
       >
         {/* <Text style={homeStyles.menuText}>☰</Text> */}
@@ -107,7 +105,7 @@ function LoginScreen({ navigation }) {
 
       if (response.status === 200) {
         Alert.alert('Başarılı', 'Giriş başarılı!');
-        navigation.replace('Main');
+        navigation.replace('MainTabs');
       } else {
         Alert.alert('Hata', 'Beklenmeyen bir yanıt alındı');
       }
@@ -188,16 +186,18 @@ function MainDrawer() {
   );
 }
 
-export default function App() {
+const App = () => {
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
-        <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Main" component={MainDrawer} options={{ headerShown: false }} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <>
+      <StatusBar barStyle="light-content" backgroundColor="#007AFF" />
+      <SafeAreaView style={{ flex: 1 }}>
+        <HomeScreen />
+      </SafeAreaView>
+    </>
   );
-}
+};
+
+export default App;
 // === STYLES ===
 
 const styles = StyleSheet.create({

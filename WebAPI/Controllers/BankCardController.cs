@@ -27,6 +27,17 @@ public class BankCardController : ControllerBase
         return BadRequest(result);
     }
 
+    [HttpGet("getdetail")]
+    public IActionResult GetCardDetail(int userId)
+    {
+        var result = _bankCardService.GetAllBankCardDetailByUserId(userId);
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+        return BadRequest(result);
+    }
+
     [HttpPost("add")]
     public IActionResult Add(BankCard bankCard)
     {

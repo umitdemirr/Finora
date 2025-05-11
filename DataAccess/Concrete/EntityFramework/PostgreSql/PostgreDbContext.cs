@@ -18,6 +18,7 @@ public class PostgreDbContext: DbContext
     public DbSet<Currency> Currencies { get; set; }
     public DbSet<BankAndExchange> BanksAndExchanges { get; set; }
     public DbSet<BankCard> BankCards { get; set; }
+    public DbSet<CreditCard> CreditCards { get; set; }
     public DbSet<BankTransaction> BankTransactions { get; set; }
     public DbSet<ExchangeRate> ExchangeRates { get; set; }
     public DbSet<Inflation> Inflations { get; set; }

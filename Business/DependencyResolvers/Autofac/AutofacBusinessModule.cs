@@ -30,6 +30,9 @@ public class AutofacBusinessModule : Module
         builder.RegisterType<BankCardManager>().As<IBankCardService>().SingleInstance();
         builder.RegisterType<EfBankCardDal>().As<IBankCardDal>().SingleInstance();
 
+        builder.RegisterType<CreditCardManager>().As<ICreditCardService>().SingleInstance();
+        builder.RegisterType<EfCreditCardDal>().As<ICreditCardDal>().SingleInstance();
+
         builder.RegisterType<BankTransactionManager>().As<IBankTransactionService>().SingleInstance();
         builder.RegisterType<EfBankTransactionDal>().As<IBankTransactionDal>().SingleInstance();
 
