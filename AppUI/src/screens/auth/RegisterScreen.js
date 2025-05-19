@@ -8,52 +8,83 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import api from '../../services/api';
 
 const RegisterScreen = ({ navigation }) => {
-  const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-  });
+  
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const validateForm = () => {
     let newErrors = {};
-
-    // İsim kontrolü
-    if (!formData.fullName) {
-      newErrors.fullName = 'İsim alanı zorunludur';
-    }
-
-    // Email kontrolü
+  
+    if (!firstName) newErrors.firstName = 'İsim alanı zorunludur';
+    if (!lastName) newErrors.lastName = 'Soyad alanı zorunludur';
+  
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!formData.email || !emailRegex.test(formData.email)) {
+    if (!email || !emailRegex.test(email)) {
       newErrors.email = 'Geçerli bir email adresi giriniz';
     }
-
-    // Şifre kontrolü
-    if (!formData.password || formData.password.length < 6) {
+  
+    if (!password || password.length < 6) {
       newErrors.password = 'Şifre en az 6 karakter olmalıdır';
     }
-
-    // Şifre eşleşme kontrolü
-    if (formData.password !== formData.confirmPassword) {
+  
+    if (password !== confirmPassword) {
       newErrors.confirmPassword = 'Şifreler eşleşmiyor';
     }
-
+  
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleRegister = () => {
-    if (validateForm()) {
-      // Kayıt işlemleri burada yapılacak
-      console.log('Kayıt başarılı:', formData);
+  const handleRegister = async () => {
+    if (!validateForm()) return;
+    
+    try {
+      const response = await api.post('/Auth/register', {
+        firstName: firstName,
+        lastName: lastName,
+        mail: email.trim(),
+        password: password,
+        registirationId: 0,
+        branchId: 0,
+        positionId: 0
+      });
+
+      if (response.status === 200) {
+        Alert.alert(
+          'Başarılı',
+          'Kayıt işleminiz başarıyla tamamlandı. Giriş yapabilirsiniz.',
+          [
+            {
+              text: 'Tamam',
+              onPress: () => navigation.replace('Login')
+            }
+          ]
+        );
+      }
+    } catch (error) {
+      let errorMessage = 'Kayıt işlemi sırasında bir hata oluştu.';
+      
+      if (error.response) {
+        if (error.response.status === 400) {
+          errorMessage = error.response.data.title || 'Geçersiz bilgiler.';
+        } else if (error.response.status === 409) {
+          errorMessage = 'Bu email adresi zaten kullanımda.';
+        }
+      }
+      
+      Alert.alert('Hata', errorMessage);
     }
   };
 
@@ -65,37 +96,43 @@ const RegisterScreen = ({ navigation }) => {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.formContainer}>
           <Text style={styles.title}>Kayıt Ol</Text>
-
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
-              placeholder="Ad Soyad"
-              value={formData.fullName}
-              onChangeText={(text) => setFormData({ ...formData, fullName: text })}
+              placeholder="Ad"
+              value={firstName}
+              onChangeText={setFirstName}
             />
-            {errors.fullName && <Text style={styles.errorText}>{errors.fullName}</Text>}
+            {errors.firstName && <Text style={styles.errorText}>{errors.firstName}</Text>}
           </View>
-
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Soyad"
+              value={lastName}
+              onChangeText={setLastName}
+            />
+            {errors.lastName && <Text style={styles.errorText}>{errors.lastName}</Text>}
+          </View>
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
               placeholder="Email"
               keyboardType="email-address"
               autoCapitalize="none"
-              value={formData.email}
-              onChangeText={(text) => setFormData({ ...formData, email: text })}
+              value={email}
+              onChangeText={setEmail}
             />
             {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
           </View>
-
           <View style={styles.inputContainer}>
             <View style={styles.passwordContainer}>
               <TextInput
                 style={styles.passwordInput}
                 placeholder="Şifre"
                 secureTextEntry={!showPassword}
-                value={formData.password}
-                onChangeText={(text) => setFormData({ ...formData, password: text })}
+                value={password}
+                onChangeText={setPassword}
               />
               <TouchableOpacity
                 style={styles.eyeIcon}
@@ -110,15 +147,14 @@ const RegisterScreen = ({ navigation }) => {
             </View>
             {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
           </View>
-
           <View style={styles.inputContainer}>
             <View style={styles.passwordContainer}>
               <TextInput
                 style={styles.passwordInput}
                 placeholder="Şifre Tekrar"
                 secureTextEntry={!showConfirmPassword}
-                value={formData.confirmPassword}
-                onChangeText={(text) => setFormData({ ...formData, confirmPassword: text })}
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
               />
               <TouchableOpacity
                 style={styles.eyeIcon}
@@ -135,15 +171,10 @@ const RegisterScreen = ({ navigation }) => {
               <Text style={styles.errorText}>{errors.confirmPassword}</Text>
             )}
           </View>
-
           <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
             <Text style={styles.registerButtonText}>Kayıt Ol</Text>
           </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.loginLink}
-            onPress={() => navigation.navigate('Login')}
-          >
+          <TouchableOpacity style={styles.loginLink} onPress={() => navigation.navigate('Login')}>
             <Text style={styles.loginLinkText}>
               Zaten hesabınız var mı? Giriş yapın
             </Text>

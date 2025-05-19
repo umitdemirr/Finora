@@ -29,4 +29,27 @@ public class EfBankAccountDal : EfEntityRepositoryBase<BankAccount, PostgreDbCon
             return result.ToList();
         }
     }
+
+    public List<BankAccountDetailDto> GetAllBankAccountDetailByUserId(int userId)
+    {
+        using (var context = new PostgreDbContext())
+        {
+            var result = from account in context.BankAccounts
+                         join currency in context.Currencies on account.CurrencyId equals currency.Id
+                         join bank in context.BanksAndExchanges on account.BankId equals bank.Id
+                         where account.UserId == userId
+                         select new BankAccountDetailDto
+                         {
+                             AccountId = account.Id,
+                             BankId = bank.Id,
+                             BankName = bank.Name,
+                             AccountName = account.Name,
+                             CurrencyId = currency.Id,
+                             CurrencyName = currency.Code,
+                             Iban = account.AccountNo,
+                             Balance = account.Balance.ToString()
+                         };
+            return result.ToList();
+        }
+    }
 }

@@ -24,7 +24,18 @@ public class UserController : ControllerBase
         }
         return BadRequest(result);
     }
-    
+
+    [HttpGet("getdetail")]
+    public IActionResult GetCardDetail(int userId)
+    {
+        var result = _userService.GetAllUserDetailByUserId(userId);
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+        return BadRequest(result);
+    }
+
     [HttpPost("add")]
     public IActionResult Add(User user)
     {

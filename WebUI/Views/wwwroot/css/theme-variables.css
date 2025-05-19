@@ -1,0 +1,77 @@
+:root {
+  /* Base theme variables */
+  --background: #ffffff;
+  --text-color: #2d3748;
+  --text-muted: #718096;
+  --border-color: #e2e8f0;
+  --card-bg: #ffffff;
+  --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --hover-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+  
+  /* Accent colors */
+  --primary: #1e88e5;
+  --primary-dark: #1565c0;
+  --success: #4caf50;
+  --danger: #f44336;
+  --warning: #ff9800;
+  --info: #2196f3;
+  
+  /* Card-specific variables */
+  --card-chip: linear-gradient(135deg, #ffd700, #ffa000);
+  --card-number: #424242;
+  --card-name: #616161;
+  --card-action-bg: rgba(255, 255, 255, 0.2);
+  --card-action-hover: rgba(255, 255, 255, 0.3);
+  
+  /* Transaction-specific colors */
+  --income: #4caf50;
+  --expense: #f44336;
+  --income-bg: rgba(76, 175, 80, 0.1);
+  --expense-bg: rgba(244, 67, 54, 0.1);
+  
+  /* Navigation */
+  --nav-bg: #ffffff;
+  --nav-border: #e2e8f0;
+  --nav-text: #2d3748;
+  --nav-hover: #edf2f7;
+  --nav-active: #1e88e5;
+}
+
+[data-theme="dark"] {
+  /* Base theme variables */
+  --background: #1a202c;
+  --text-color: #e2e8f0;
+  --text-muted: #a0aec0;
+  --border-color: #2d3748;
+  --card-bg: #2d3748;
+  --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  --hover-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+  
+  /* Accent colors */
+  --primary: #90caf9;
+  --primary-dark: #64b5f6;
+  --success: #81c784;
+  --danger: #e57373;
+  --warning: #ffb74d;
+  --info: #64b5f6;
+  
+  /* Card-specific variables */
+  --card-chip: linear-gradient(135deg, #ffd700, #ffa000);
+  --card-number: #e2e8f0;
+  --card-name: #cbd5e0;
+  --card-action-bg: rgba(255, 255, 255, 0.15);
+  --card-action-hover: rgba(255, 255, 255, 0.25);
+  
+  /* Transaction-specific colors */
+  --income: #81c784;
+  --expense: #e57373;
+  --income-bg: rgba(129, 199, 132, 0.1);
+  --expense-bg: rgba(229, 115, 115, 0.1);
+  
+  /* Navigation */
+  --nav-bg: #2d3748;
+  --nav-border: #4a5568;
+  --nav-text: #e2e8f0;
+  --nav-hover: #4a5568;
+  --nav-active: #90caf9;
+} 

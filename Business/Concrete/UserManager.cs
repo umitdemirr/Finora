@@ -5,7 +5,9 @@ using Core.Entities.Concrete;
 using Core.Utilities.Business;
 using Core.Utilities.Results;
 using DataAccess.Abstract;
+using DataAccess.Concrete.EntityFramework;
 using Entities.Concrete;
+using Entities.DTOs;
 using System.Linq.Expressions;
 
 namespace Business.Concrete;
@@ -46,6 +48,12 @@ public class UserManager : IUserService
     {
         return new SuccessDataResult<List<User>>(_userDal.GetAll(filter),Messages.UsersList);
     }
+
+    public IDataResult<List<UserDetailDto>> GetAllUserDetailByUserId(int userId)
+    {
+        return new SuccessDataResult<List<UserDetailDto>>(_userDal.GetAllUserDetailByUserId(userId), Messages.UsersList); ;
+    }
+
     public List<OperationClaim> GetClaims(User user)
     {
         return _userDal.GetClaims(user);

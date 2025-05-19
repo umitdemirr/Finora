@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Core.Entities;
+using Newtonsoft.Json;
 using System.Text;
 using WebUI.Models;
 namespace WebUI.Services;
@@ -25,7 +26,6 @@ public class BusinessService
         {
             throw new Exception($"API Hatası: {response.StatusCode} - {responseString}");
         }
-
     }
 
     public async Task<Result<T>> Get<T>(string url, T entity)
@@ -57,5 +57,24 @@ public class BusinessService
         var result = await GetAll<T>(url);
         result.Data = result.Data?.Where(predicate).ToList();
         return result;
+    }
+
+    public async Task<AiViewModel> GenerateWithAI(AiViewModel model, string url)
+    {
+        var json = JsonConvert.SerializeObject(model);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        var response = await _httpClient.PostAsync(url, content);
+        var responseString = await response.Content.ReadAsStringAsync();
+
+        var result = JsonConvert.DeserializeObject<AiViewModel>(responseString);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception($"API Hatası: {response.StatusCode} - {responseString}");
+        }
+
+        model.Answer = result.Answer;
+
+        return model;
     }
 }

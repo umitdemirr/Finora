@@ -1,5 +1,211 @@
 ﻿@model HomeViewModel
 
+<style>
+    .card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none;
+        background: var(--card-bg);
+        border-radius: 16px;
+        color: var(--text-color);
+    }
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--hover-shadow);
+    }
+    .list-group-item {
+        transition: all 0.2s ease;
+        border-left: 4px solid transparent;
+        background-color: var(--card-bg);
+        color: var(--text-color);
+        border-color: var(--border-color);
+    }
+    .list-group-item:hover {
+        background-color: var(--nav-hover);
+        border-left: 4px solid var(--success);
+    }
+    .custom-select {
+        border-radius: 20px;
+        padding: 8px 15px;
+        border: 1px solid var(--border-color);
+        background-color: var(--card-bg);
+        color: var(--text-color);
+        transition: all 0.2s ease;
+    }
+    .custom-select:focus {
+        box-shadow: 0 0 0 0.2rem rgba(58, 210, 159, 0.25);
+        border-color: var(--success);
+    }
+    .btn-outline-secondary {
+        border-radius: 20px;
+        padding: 5px 15px;
+        transition: all 0.2s ease;
+        color: var(--text-muted);
+        border-color: var(--border-color);
+    }
+    .btn-outline-secondary:hover {
+        background-color: var(--success);
+        border-color: var(--success);
+        color: var(--card-bg);
+    }
+    .btn-outline-secondary.active {
+        background-color: var(--success);
+        border-color: var(--success);
+        color: var(--card-bg);
+    }
+    .card-title {
+        color: var(--text-color);
+    }
+    .text-muted {
+        color: var(--text-muted) !important;
+    }
+    .fe {
+        transition: all 0.2s ease;
+        color: var(--text-muted);
+    }
+    .card:hover .fe {
+        transform: scale(1.1);
+    }
+    
+    /* Özet kartları için özel stiller */
+    .summary-card {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .summary-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--success), rgba(58, 210, 159, 0.3));
+        transition: all 0.3s ease;
+    }
+    
+    .summary-card:hover::before {
+        height: 6px;
+    }
+    
+    .summary-card .card-body {
+        padding: 1.5rem;
+        background: var(--card-bg);
+    }
+    
+    .summary-card .small {
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .summary-card .card-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0.5rem 0;
+        color: var(--text-color);
+    }
+    
+    .summary-card .fe {
+        font-size: 2rem;
+        opacity: 0.8;
+    }
+    
+    .summary-card:hover .fe {
+        transform: scale(1.1) rotate(5deg);
+    }
+    
+    /* Trend göstergeleri için stiller */
+    .trend-indicator {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .trend-up {
+        background-color: var(--income-bg);
+        color: var(--income);
+    }
+    
+    .trend-down {
+        background-color: var(--expense-bg);
+        color: var(--expense);
+    }
+    
+    .fe-arrow-up, .fe-arrow-down {
+        margin-right: 4px;
+        font-size: 0.75rem;
+    }
+    
+    /* Grafik kartları için özel stiller */
+    .chart-card {
+        border-radius: 16px;
+        background: var(--card-bg);
+        box-shadow: var(--card-shadow);
+    }
+    
+    .chart-card .card-header {
+        background: var(--card-bg);
+        border-bottom: 1px solid var(--border-color);
+        padding: 1.25rem 1.5rem;
+    }
+    
+    .chart-card .card-header strong {
+        font-size: 1.1rem;
+        color: var(--text-color);
+    }
+    
+    /* Bütçe ve Hedef kartları için ek stiller */
+    .budget-item, .goal-item {
+        padding: 15px;
+        border-radius: 10px;
+        background: var(--card-bg);
+        transition: all 0.3s ease;
+    }
+    
+    .budget-item:hover, .goal-item:hover {
+        background: var(--nav-hover);
+    }
+    
+    .progress {
+        background-color: var(--border-color);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    .progress-bar {
+        transition: width 1s ease;
+        border-radius: 10px;
+    }
+    
+    .badge {
+        padding: 8px 12px;
+        border-radius: 20px;
+        font-weight: 500;
+    }
+    
+    .badge-success {
+        background-color: var(--income-bg);
+        color: var(--income);
+    }
+    
+    .badge-primary {
+        background-color: var(--primary);
+        color: var(--card-bg);
+    }
+    
+    .btn-outline-primary {
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+    
+    .btn-outline-primary:hover {
+        background-color: var(--primary);
+        color: var(--card-bg);
+    }
+</style>
+
 <div class="row justify-content-center">
     <div class="col-12">
         <div class="row align-items-center mb-2">
@@ -22,64 +228,76 @@
         <!-- Özet Kartları -->
         <div class="row my-4">
             <div class="col-md-3">
-                <div class="card shadow mb-4">
+                <div class="card shadow mb-4 summary-card">
                     <div class="card-body">
                         <div class="row align-items-center">
                             <div class="col">
                                 <small class="text-muted mb-1">Toplam Varlık</small>
-                                <h3 class="card-title mb-0">₺@Model.TotalMoney?.ToString("N2")</h3>
-                                <p class="small text-muted mb-0"><span class="fe fe-arrow-up fe-12 text-success"></span><span class="text-success">+3.5%</span></p>
+                                <h3 class="card-title">₺@Model.TotalMoney?.ToString("N2")</h3>
+                                <div class="trend-indicator trend-up">
+                                    <span class="fe fe-arrow-up"></span>
+                                    <span>3.5%</span>
+                                </div>
                             </div>
                             <div class="col-auto">
-                                <span class="fe fe-dollar-sign fe-32 text-muted"></span>
+                                <span class="fe fe-dollar-sign"></span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card shadow mb-4">
+                <div class="card shadow mb-4 summary-card">
                     <div class="card-body">
                         <div class="row align-items-center">
                             <div class="col">
                                 <small class="text-muted mb-1">Toplam Gelir</small>
-                                <h3 class="card-title mb-0">₺@Model.TotalIncome?.ToString("N2")</h3>
-                                <p class="small text-muted mb-0"><span class="fe fe-arrow-up fe-12 text-success"></span><span class="text-success">+2.8%</span></p>
+                                <h3 class="card-title">₺@Model.TotalIncome?.ToString("N2")</h3>
+                                <div class="trend-indicator trend-up">
+                                    <span class="fe fe-arrow-up"></span>
+                                    <span>2.8%</span>
+                                </div>
                             </div>
                             <div class="col-auto">
-                                <span class="fe fe-trending-up fe-32 text-muted"></span>
+                                <span class="fe fe-trending-up"></span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card shadow mb-4">
+                <div class="card shadow mb-4 summary-card">
                     <div class="card-body">
                         <div class="row align-items-center">
                             <div class="col">
                                 <small class="text-muted mb-1">Toplam Gider</small>
-                                <h3 class="card-title mb-0">₺@Model.TotalExpanse?.ToString("N2")</h3>
-                                <p class="small text-muted mb-0"><span class="fe fe-arrow-down fe-12 text-danger"></span><span class="text-danger">-1.2%</span></p>
+                                <h3 class="card-title">₺@Model.TotalExpanse?.ToString("N2")</h3>
+                                <div class="trend-indicator trend-down">
+                                    <span class="fe fe-arrow-down"></span>
+                                    <span>1.2%</span>
+                                </div>
                             </div>
                             <div class="col-auto">
-                                <span class="fe fe-trending-down fe-32 text-muted"></span>
+                                <span class="fe fe-trending-down"></span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card shadow mb-4">
+                <div class="card shadow mb-4 summary-card">
                     <div class="card-body">
                         <div class="row align-items-center">
                             <div class="col">
                                 <small class="text-muted mb-1">Net Kalan</small>
-                                <h3 class="card-title mb-0">₺@Model.NetWorth?.ToString("N2")</h3>
-                                <p class="small text-muted mb-0"><span class="fe fe-arrow-up fe-12 text-success"></span><span class="text-success">+8.3%</span></p>
+                                <h3 class="card-title">₺@Model.NetWorth?.ToString("N2")</h3>
+                                <div class="trend-indicator trend-up">
+                                    <span class="fe fe-arrow-up"></span>
+                                    <span>8.3%</span>
+                                </div>
                             </div>
                             <div class="col-auto">
-                                <span class="fe fe-bar-chart-2 fe-32 text-muted"></span>
+                                <span class="fe fe-bar-chart-2"></span>
                             </div>
                         </div>
                     </div>
@@ -90,33 +308,175 @@
         <!-- Grafikler -->
         <div class="row">
             <!-- Gelir/Gider Grafiği -->
-<div class="col-md-6 mb-4">
-    <div class="card shadow">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <strong class="card-title mb-0">Gelir/Gider Grafiği</strong>
-            <div class="btn-group" role="group" aria-label="Zaman Filtreleri" id="filterButtons">
-                <a class="btn btn-outline-secondary btn-sm" href='@Url.Action("Index", "Home", new { range = 1 })'>Bugün</a>
-                <a class="btn btn-outline-secondary btn-sm" href='@Url.Action("Index", "Home", new { range = 7 })'>1 Hafta</a>
-                <a class="btn btn-outline-secondary btn-sm" href='@Url.Action("Index", "Home", new { range = 30 })'>1 Ay</a>
-                <a class="btn btn-outline-secondary btn-sm" href='@Url.Action("Index", "Home", new { range = 180 })'>6 Ay</a>
-                <a class="btn btn-outline-secondary btn-sm" href='@Url.Action("Index", "Home", new { range = 365 })'>1 Yıl</a>
+            <div class="col-md-6 mb-4">
+                <div class="card shadow chart-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <strong class="card-title mb-0">Gelir/Gider Grafiği</strong>
+                        <div class="btn-group" role="group" aria-label="Zaman Filtreleri" id="filterButtons">
+                            <a class="btn btn-outline-secondary btn-sm" href='@Url.Action("Index", "Home", new { range = 1 })'>Bugün</a>
+                            <a class="btn btn-outline-secondary btn-sm" href='@Url.Action("Index", "Home", new { range = 7 })'>1 Hafta</a>
+                            <a class="btn btn-outline-secondary btn-sm" href='@Url.Action("Index", "Home", new { range = 30 })'>1 Ay</a>
+                            <a class="btn btn-outline-secondary btn-sm" href='@Url.Action("Index", "Home", new { range = 180 })'>6 Ay</a>
+                            <a class="btn btn-outline-secondary btn-sm" href='@Url.Action("Index", "Home", new { range = 365 })'>1 Yıl</a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="gelirGider" width="733" height="300"></canvas>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="card-body">
-            <canvas id="gelirGider" width="733" height="300"></canvas>
-        </div>
-    </div>
-</div>
 
             <!-- Varlık Dağılımı -->
             <div class="col-md-6">
-                <div class="card shadow mb-4">
+                <div class="card shadow mb-4 chart-card">
                     <div class="card-header">
                         <strong>Varlık Dağılımı</strong>
                     </div>
                     <div class="card-body">
                         <div class="chart-box">
                             <canvas id="assetDistributionChart" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Yeni Bölümler -->
+        <div class="row">
+            <!-- Harcama Kategorileri -->
+            <div class="col-md-6">
+                <div class="card shadow mb-4 chart-card">
+                    <div class="card-header">
+                        <strong>Harcama Kategorileri</strong>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-box">
+                            <canvas id="expenseCategoriesChart" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Yaklaşan Ödemeler -->
+            <div class="col-md-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <strong>Yaklaşan Ödemeler</strong>
+                        <a href="#" class="btn btn-sm btn-outline-primary">Tümünü Gör</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush my-n3">
+                            <div class="list-group-item">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <span class="fe fe-calendar fe-24 text-warning"></span>
+                                    </div>
+                                    <div class="col">
+                                        <small><strong>Elektrik Faturası</strong></small>
+                                        <div class="my-0 text-muted small">Son Ödeme: 25 Mart 2024</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <span class="text-danger">₺450.00</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="list-group-item">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <span class="fe fe-home fe-24 text-primary"></span>
+                                    </div>
+                                    <div class="col">
+                                        <small><strong>Kira Ödemesi</strong></small>
+                                        <div class="my-0 text-muted small">Son Ödeme: 1 Nisan 2024</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <span class="text-danger">₺3,500.00</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bütçe Takibi ve Hedefler -->
+        <div class="row">
+            <!-- Aylık Bütçe Takibi -->
+            <div class="col-md-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <strong>Aylık Bütçe Takibi</strong>
+                    </div>
+                    <div class="card-body">
+                        <div class="budget-item mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>Market Alışverişi</span>
+                                <span class="text-muted">₺2,500 / ₺3,000</span>
+                            </div>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: 83%;" aria-valuenow="83" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                        <div class="budget-item mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>Ulaşım</span>
+                                <span class="text-muted">₺800 / ₺1,000</span>
+                            </div>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar bg-warning" role="progressbar" style="width: 80%;" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                        <div class="budget-item">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>Eğlence</span>
+                                <span class="text-muted">₺1,200 / ₺1,000</span>
+                            </div>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar bg-danger" role="progressbar" style="width: 120%;" aria-valuenow="120" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Finansal Hedefler -->
+            <div class="col-md-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <strong>Finansal Hedefler</strong>
+                        <button class="btn btn-sm btn-outline-primary">Yeni Hedef</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="goal-item mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <h6 class="mb-0">Tatil Fonu</h6>
+                                    <small class="text-muted">Hedef Tarih: Ağustos 2024</small>
+                                </div>
+                                <span class="badge badge-success">%65</span>
+                            </div>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: 65%;" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <div class="text-right mt-2">
+                                <small class="text-muted">₺13,000 / ₺20,000</small>
+                            </div>
+                        </div>
+                        <div class="goal-item">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <h6 class="mb-0">Araba Alımı</h6>
+                                    <small class="text-muted">Hedef Tarih: Aralık 2024</small>
+                                </div>
+                                <span class="badge badge-primary">%30</span>
+                            </div>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar bg-primary" role="progressbar" style="width: 30%;" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <div class="text-right mt-2">
+                                <small class="text-muted">₺90,000 / ₺300,000</small>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -262,20 +622,30 @@
                     {
                         label: 'Gelir',
                         borderColor: '#3ad29f',
-                        backgroundColor: '#3ad29f',
+                        backgroundColor: 'rgba(58, 210, 159, 0.1)',
                         data: filteredGelirler,
-                        fill: false,
-                        tension: 0,
-                        pointRadius: 0
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: '#3ad29f',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#3ad29f',
+                        pointHoverBorderWidth: 2
                     },
                     {
                         label: 'Gider',
-                        borderColor: '#dc3545',
-                        backgroundColor: '#dc3545',
+                        borderColor: '#ff7675',
+                        backgroundColor: 'rgba(255, 118, 117, 0.1)',
                         data: filteredGiderler,
-                        fill: false,
-                        tension: 0,
-                        pointRadius: 0
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: '#ff7675',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#ff7675',
+                        pointHoverBorderWidth: 2
                     }
                 ]
             },
@@ -288,22 +658,60 @@
                 plugins: {
                     legend: {
                         display: true,
-                        position: 'top'
+                        position: 'top',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        }
                     },
                     tooltip: {
                         enabled: true,
                         mode: 'nearest',
-                        intersect: false
+                        intersect: false,
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        titleColor: '#2d3436',
+                        bodyColor: '#2d3436',
+                        borderColor: '#e0e0e0',
+                        borderWidth: 1,
+                        padding: 10,
+                        displayColors: true,
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ₺' + context.parsed.y.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+                            }
+                        }
                     }
                 },
                 scales: {
                     x: {
-                        grid: { display: false }
+                        grid: { 
+                            display: true,
+                            color: 'rgba(0,0,0,0.05)'
+                        },
+                        ticks: {
+                            padding: 10,
+                            color: '#636e72'
+                        }
                     },
                     y: {
                         beginAtZero: true,
-                        grid: { display: false }
+                        grid: { 
+                            display: true,
+                            color: 'rgba(0,0,0,0.05)'
+                        },
+                        ticks: {
+                            padding: 10,
+                            color: '#636e72',
+                            callback: function(value) {
+                                return '₺' + value.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+                            }
+                        }
                     }
+                },
+                animation: {
+                    duration: 1000,
+                    easing: 'easeInOutQuart'
                 }
             },
             plugins: [crosshairPlugin]
@@ -311,19 +719,93 @@
     }
     updateChartData(30);
 
- // Varlık Dağılımı Grafiği
- var assetDistributionChart = new Chart(document.getElementById('assetDistributionChart'), {
-     type: 'doughnut',
-     data: {
-         labels: ['Nakit', 'Hisse Senetleri', 'Kripto', 'Gayrimenkul'],
-         datasets: [{
-             data: [10, 45, 15, 30],
-             backgroundColor: ['#3498db', '#2ecc71', '#f1c40f', '#9b59b6']
-         }]
-     },
-     options: {
-         responsive: true,
-         maintainAspectRatio: false
-     }
- });
+    // Varlık Dağılımı Grafiği
+    var assetDistributionChart = new Chart(document.getElementById('assetDistributionChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Nakit', 'Hisse Senetleri', 'Kripto', 'Gayrimenkul'],
+            datasets: [{
+                data: [10, 45, 15, 30],
+                backgroundColor: ['#74b9ff', '#00b894', '#ffeaa7', '#a29bfe'],
+                borderWidth: 0,
+                hoverOffset: 15
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '75%',
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    titleColor: '#2d3436',
+                    bodyColor: '#2d3436',
+                    borderColor: '#e0e0e0',
+                    borderWidth: 1,
+                    padding: 10,
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': %' + context.parsed;
+                        }
+                    }
+                }
+            },
+            animation: {
+                animateRotate: true,
+                animateScale: true,
+                duration: 1000,
+                easing: 'easeInOutQuart'
+            }
+        }
+    });
+
+    // Harcama Kategorileri Grafiği
+    var expenseCategoriesChart = new Chart(document.getElementById('expenseCategoriesChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Market', 'Ulaşım', 'Eğlence', 'Faturalar', 'Sağlık', 'Diğer'],
+            datasets: [{
+                data: [30, 15, 20, 25, 5, 5],
+                backgroundColor: [
+                    'rgba(58, 210, 159, 0.7)',
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(153, 102, 255, 0.7)',
+                    'rgba(255, 159, 64, 0.7)'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': %' + context.raw;
+                        }
+                    }
+                }
+            },
+            cutout: '70%'
+        }
+    });
 </script>

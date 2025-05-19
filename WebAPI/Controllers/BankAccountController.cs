@@ -1,4 +1,5 @@
 ﻿using Business.Abstract;
+using Core.Entities.Concrete;
 using Entities.Concrete;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,6 +30,17 @@ public class BankAccountController : ControllerBase
     public IActionResult GetDetails()
     {
         var result = _bankAccountService.GetAllBankAccountDetail();
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+        return BadRequest(result);
+    }
+
+    [HttpGet("getdetailbyuserid")]
+    public IActionResult GetDetailsByUserId(int userId)
+    {
+        var result = _bankAccountService.GetAllBankAccountDetailByUserId(userId);
         if (result.Success)
         {
             return Ok(result);

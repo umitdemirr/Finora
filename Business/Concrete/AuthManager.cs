@@ -30,7 +30,7 @@ public class AuthManager : IAuthService
             LastName = userForRegisterDto.LastName,
             PasswordHash = passwordHash,
             PasswordSalt = passwordSalt,
-            CreateAt = DateTime.Now,
+            CreateAt = DateTime.UtcNow,
             
         };
         _userService.Add(user);
@@ -45,10 +45,10 @@ public class AuthManager : IAuthService
             return new ErrorDataResult<User>(Messages.UserNotFound);
         }
 
-        //if (!HashingHelper.VerifyPasswordHash(userForLoginDto.Password, userToCheck.PasswordHash, userToCheck.PasswordSalt))
-        //{
-        //    return new ErrorDataResult<User>(Messages.PasswordError);
-        //}
+        if (!HashingHelper.VerifyPasswordHash(userForLoginDto.Password, userToCheck.PasswordHash, userToCheck.PasswordSalt))
+        {
+            return new ErrorDataResult<User>(Messages.PasswordError);
+        }
 
         return new SuccessDataResult<User>(userToCheck, Messages.SuccessfulLogin);
     } 

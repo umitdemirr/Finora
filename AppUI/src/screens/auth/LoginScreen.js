@@ -16,9 +16,28 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import api from '../services/api';
+import api from '../../services/api';
 
 const { height } = Dimensions.get('window');
+
+// JWT token'dan user ID'yi çıkaran yardımcı fonksiyon
+const getUserIdFromToken = (token) => {
+  try {
+    // Token'ın ikinci kısmını al (payload)
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+
+    const payload = JSON.parse(jsonPayload);
+    // nameidentifier claim'inden user ID'yi al
+    return payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'];
+  } catch (error) {
+    console.error('Token decode hatası:', error);
+    return null;
+  }
+};
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -76,29 +95,36 @@ const LoginScreen = ({ navigation }) => {
         password: password
       });
 
-      const { token, expiration } = response.data;
-      
-      // Token'ı AsyncStorage'a kaydet
-      await AsyncStorage.setItem('userToken', token);
-      await AsyncStorage.setItem('tokenExpiration', expiration);
-      
-      // API çağrısı başarılı olduğunda ana ekrana yönlendir
-      navigation.replace('MainTabs');
+      if (response.data && response.data.token) {
+        const { token, expiration } = response.data;
+        
+        // Token'dan user ID'yi çıkar
+        const userId = getUserIdFromToken(token);
+        
+        if (!userId) {
+          throw new Error('Kullanıcı ID\'si alınamadı');
+        }
+
+        // Token ve kullanıcı ID'sini AsyncStorage'a kaydet
+        await AsyncStorage.setItem('userToken', token);
+        await AsyncStorage.setItem('tokenExpiration', expiration);
+        await AsyncStorage.setItem('userId', userId.toString());
+        
+        // API çağrısı başarılı olduğunda ana ekrana yönlendir
+        navigation.replace('MainTabs');
+      } else {
+        Alert.alert('Hata', 'Geçersiz API yanıtı');
+      }
     } catch (error) {
-      let errorMessage = 'Giriş yapılırken bir hata oluştu.';
-      
+      let errorMessage = error.message;
+       
       if (error.response) {
         // API'den gelen hata mesajı
-        if (error.response.status === 401) {
-          errorMessage = 'E-posta veya şifre hatalı.';
-        } else if (error.response.data?.message) {
-          errorMessage = error.response.data.message;
-        }
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-      
+        if (error.response.status === 400) { errorMessage = error.response.data; }
+      } 
+      else { errorMessage = error.message; } 
       Alert.alert('Hata', errorMessage);
+    
     } finally {
       setIsLoading(false);
     }
@@ -116,7 +142,7 @@ const LoginScreen = ({ navigation }) => {
         <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
           <View style={styles.logoContainer}>
             <Icon name="bank" size={80} color="#007AFF" />
-            <Text style={styles.appName}>Fino</Text>
+            <Text style={styles.appName}>Finora</Text>
             <Text style={styles.appSlogan}>Finansal Özgürlüğünüz</Text>
           </View>
 
@@ -168,7 +194,7 @@ const LoginScreen = ({ navigation }) => {
 
             <TouchableOpacity
               style={[styles.loginButton, isLoading && styles.loginButtonDisabled]}
-              onPress={passLogin}
+              onPress={handleLogin}
               disabled={isLoading}
             >
               {isLoading ? (
@@ -202,6 +228,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#ffffff',
+    padding: 200,
   },
   scrollContainer: {
     flexGrow: 1,

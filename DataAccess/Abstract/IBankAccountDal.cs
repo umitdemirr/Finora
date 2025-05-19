@@ -7,4 +7,5 @@ namespace DataAccess.Abstract;
 public interface IBankAccountDal : IEntityRepository<BankAccount>
 {
     List<BankAccountDetailDto> GetAllBankAccountDetail();
+    List<BankAccountDetailDto> GetAllBankAccountDetailByUserId(int userId);
 }

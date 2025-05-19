@@ -12,4 +12,5 @@ public interface IBankAccountService
     IResult Update(BankAccount bankAccount);
     IResult Delete(BankAccount bankAccount);
     IDataResult<List<BankAccountDetailDto>> GetAllBankAccountDetail();
+    IDataResult<List<BankAccountDetailDto>> GetAllBankAccountDetailByUserId(int userId);
 }

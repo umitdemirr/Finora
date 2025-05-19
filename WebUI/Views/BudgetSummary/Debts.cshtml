@@ -1,1 +1,309 @@
-﻿Borçlar
+﻿@model BankTransactionViewModel
+
+<link rel="stylesheet" href="~/css/dataTables.bootstrap4.css">
+
+<style>
+    .summary-card {
+        border-radius: 15px;
+        transition: all 0.3s ease;
+        border: none;
+        background: var(--card-bg);
+    }
+
+    .debt-stats {
+        background: linear-gradient(45deg, #ff9800, #f57c00);
+        color: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .stat-item {
+        padding: 15px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(5px);
+    }
+
+    .stat-value {
+        font-size: 1.8rem;
+        font-weight: 600;
+        margin: 10px 0;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+
+    .trend-indicator {
+        font-size: 0.8rem;
+        padding: 4px 8px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .debt-card {
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        background: var(--card-bg);
+        transition: all 0.3s ease;
+    }
+
+    .debt-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--hover-shadow);
+    }
+
+    .debt-progress {
+        height: 8px;
+        border-radius: 4px;
+        background: var(--border-color);
+        margin: 10px 0;
+        overflow: hidden;
+    }
+
+    .debt-progress-bar {
+        height: 100%;
+        border-radius: 4px;
+        background: linear-gradient(45deg, #ff9800, #f57c00);
+        transition: width 0.3s ease;
+    }
+
+    .debt-badge {
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        background: rgba(255, 152, 0, 0.1);
+        color: #ff9800;
+    }
+
+    .debt-badge.active {
+        background: rgba(76, 175, 80, 0.1);
+        color: #4caf50;
+    }
+
+    .debt-badge.overdue {
+        background: rgba(244, 67, 54, 0.1);
+        color: #f44336;
+    }
+
+    .action-button {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        margin: 0 2px;
+    }
+
+    .action-button:hover {
+        transform: translateY(-2px);
+    }
+
+    .action-button.edit {
+        background: rgba(58, 210, 159, 0.1);
+        color: var(--success);
+    }
+
+    .action-button.pay {
+        background: rgba(255, 152, 0, 0.1);
+        color: #ff9800;
+    }
+
+    .action-button.delete {
+        background: rgba(255, 99, 132, 0.1);
+        color: #ff6384;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-12">
+            <div class="row align-items-center mb-4">
+                <div class="col">
+                    <h2 class="h3 page-title">Borç Yönetimi</h2>
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-warning" data-toggle="modal" data-target="#addDebtModal">
+                        <i class="fe fe-plus fe-16 mr-2"></i>Yeni Borç Ekle
+                    </button>
+                </div>
+            </div>
+
+            <!-- Borç İstatistikleri -->
+            <div class="debt-stats mb-4">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="stat-item">
+                            <div class="stat-label">Toplam Borç</div>
+                            <div class="stat-value">₺85,000.00</div>
+                            <div class="trend-indicator">
+                                <i class="fe fe-arrow-down-right"></i> %12.5
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-item">
+                            <div class="stat-label">Aylık Ödeme</div>
+                            <div class="stat-value">₺4,250.00</div>
+                            <div class="trend-indicator">Sabit</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-item">
+                            <div class="stat-label">Aktif Borç</div>
+                            <div class="stat-value">3</div>
+                            <div class="stat-label">Kredi</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-item">
+                            <div class="stat-label">Vadesi Yaklaşan</div>
+                            <div class="stat-value">₺2,500.00</div>
+                            <div class="trend-indicator">7 gün</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aktif Borçlar -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card summary-card">
+                        <div class="card-body">
+                            <div class="debt-card">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h6 class="mb-0">Konut Kredisi</h6>
+                                        <small class="text-muted">Ziraat Bankası</small>
+                                    </div>
+                                    <div class="col-auto">
+                                        <span class="debt-badge active">Aktif</span>
+                                    </div>
+                                </div>
+                                <div class="debt-progress mt-3">
+                                    <div class="debt-progress-bar" style="width: 35%;"></div>
+                                </div>
+                                <div class="row align-items-center mt-2">
+                                    <div class="col">
+                                        <small class="text-muted">Kalan Borç</small>
+                                        <h6 class="mb-0">₺65,000.00</h6>
+                                    </div>
+                                    <div class="col-auto text-right">
+                                        <small class="text-muted">Aylık Taksit</small>
+                                        <h6 class="mb-0">₺2,500.00</h6>
+                                    </div>
+                                </div>
+                                <div class="row align-items-center mt-3">
+                                    <div class="col">
+                                        <small class="text-muted">Son Ödeme: 15 Nisan 2024</small>
+                                    </div>
+                                    <div class="col-auto">
+                                        <a class="action-button pay" title="Ödeme Yap">
+                                            <i class="fe fe-credit-card"></i>
+                                        </a>
+                                        <a class="action-button edit" title="Düzenle">
+                                            <i class="fe fe-edit-2"></i>
+                                        </a>
+                                        <a class="action-button delete" title="Sil">
+                                            <i class="fe fe-trash"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="debt-card">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h6 class="mb-0">İhtiyaç Kredisi</h6>
+                                        <small class="text-muted">Yapı Kredi</small>
+                                    </div>
+                                    <div class="col-auto">
+                                        <span class="debt-badge overdue">Gecikmiş</span>
+                                    </div>
+                                </div>
+                                <div class="debt-progress mt-3">
+                                    <div class="debt-progress-bar" style="width: 65%;"></div>
+                                </div>
+                                <div class="row align-items-center mt-2">
+                                    <div class="col">
+                                        <small class="text-muted">Kalan Borç</small>
+                                        <h6 class="mb-0">₺15,000.00</h6>
+                                    </div>
+                                    <div class="col-auto text-right">
+                                        <small class="text-muted">Aylık Taksit</small>
+                                        <h6 class="mb-0">₺1,250.00</h6>
+                                    </div>
+                                </div>
+                                <div class="row align-items-center mt-3">
+                                    <div class="col">
+                                        <small class="text-muted">Son Ödeme: 5 Nisan 2024</small>
+                                    </div>
+                                    <div class="col-auto">
+                                        <a class="action-button pay" title="Ödeme Yap">
+                                            <i class="fe fe-credit-card"></i>
+                                        </a>
+                                        <a class="action-button edit" title="Düzenle">
+                                            <i class="fe fe-edit-2"></i>
+                                        </a>
+                                        <a class="action-button delete" title="Sil">
+                                            <i class="fe fe-trash"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="debt-card">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h6 class="mb-0">Araç Kredisi</h6>
+                                        <small class="text-muted">İş Bankası</small>
+                                    </div>
+                                    <div class="col-auto">
+                                        <span class="debt-badge active">Aktif</span>
+                                    </div>
+                                </div>
+                                <div class="debt-progress mt-3">
+                                    <div class="debt-progress-bar" style="width: 25%;"></div>
+                                </div>
+                                <div class="row align-items-center mt-2">
+                                    <div class="col">
+                                        <small class="text-muted">Kalan Borç</small>
+                                        <h6 class="mb-0">₺5,000.00</h6>
+                                    </div>
+                                    <div class="col-auto text-right">
+                                        <small class="text-muted">Aylık Taksit</small>
+                                        <h6 class="mb-0">₺500.00</h6>
+                                    </div>
+                                </div>
+                                <div class="row align-items-center mt-3">
+                                    <div class="col">
+                                        <small class="text-muted">Son Ödeme: 20 Nisan 2024</small>
+                                    </div>
+                                    <div class="col-auto">
+                                        <a class="action-button pay" title="Ödeme Yap">
+                                            <i class="fe fe-credit-card"></i>
+                                        </a>
+                                        <a class="action-button edit" title="Düzenle">
+                                            <i class="fe fe-edit-2"></i>
+                                        </a>
+                                        <a class="action-button delete" title="Sil">
+                                            <i class="fe fe-trash"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

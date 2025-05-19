@@ -24,6 +24,7 @@ public class EfBankTransactionDal : EfEntityRepositoryBase<BankTransaction, Post
                              Type = transaction.Category,
                              Amount = transaction.Amount,
                              Currency = transaction.Currency,
+                             TransactionType = transaction.TransactionType,
                              Description = transaction.Description,
                              TransactionDate = transaction.Date,
                          };

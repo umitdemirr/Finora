@@ -1,5 +1,100 @@
 ﻿@model BankTransactionViewModel
 <link rel="stylesheet" href="~/css/dataTables.bootstrap4.css">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
+<style>
+    .transaction-card {
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
+        margin-bottom: 1rem;
+    }
+    .transaction-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    .income {
+        border-left: 4px solid #3ad29f;
+    }
+    .expense {
+        border-left: 4px solid #dc3545;
+    }
+    .transaction-amount.income {
+        color: #3ad29f;
+        font-weight: bold;
+    }
+    .transaction-amount.expense {
+        color: #dc3545;
+        font-weight: bold;
+    }
+    .transaction-type-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+    }
+    .transaction-type-icon.income {
+        background-color: rgba(58, 210, 159, 0.1);
+        color: #3ad29f;
+    }
+    .transaction-type-icon.expense {
+        background-color: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+    }
+    .action-buttons a {
+        padding: 5px;
+        margin: 0 2px;
+        border-radius: 5px;
+        transition: background-color 0.2s;
+    }
+    .action-buttons a:hover {
+        background-color: rgba(0,0,0,0.05);
+    }
+    .summary-card {
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .summary-card.income {
+        background: linear-gradient(45deg, #3ad29f22, #3ad29f11);
+        border: 1px solid #3ad29f33;
+    }
+
+    .summary-card.expense {
+        background: linear-gradient(45deg, #dc354522, #dc354511);
+        border: 1px solid #dc354533;
+    }
+
+    .summary-amount {
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    .nav-tabs .nav-link {
+        border: none;
+        border-bottom: 2px solid transparent;
+        color: #6c757d;
+        font-weight: 500;
+        padding: 10px 20px;
+    }
+
+    .nav-tabs .nav-link.active {
+        border: none;
+        border-bottom: 2px solid #3ad29f;
+        color: #3ad29f;
+        background: transparent;
+    }
+
+    .nav-tabs .nav-link:hover {
+        border: none;
+        border-bottom: 2px solid #3ad29f88;
+    }
+</style>
 
 <div class="container-fluid">
     <div class="row justify-content-center">
@@ -9,114 +104,331 @@
                     <h2 class="h3 mb-0 page-title">Hesap Hareketleri</h2>
                 </div>
                 <div class="col-auto">
-                    <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#addRequestModal">
-                        <span class="fe fe-plus mr-2"></span>Ekle
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addRequestModal">
+                        <i class="fe fe-plus mr-2"></i>Yeni İşlem Ekle
                     </button>
                 </div>
             </div>
 
-            <div class="row my-4">
-                <div class="col-md-12">
-                    <div class="card shadow">
-                        <div class="card-body">
-                            <table class="table datatables" id="dataTable-1">
-                                <thead>
-                                    <tr>
-                                        <th>Id</th>
-                                        <th>Hesap Adı</th>
-                                        <th>Kategori</th>
-                                        <th>Ödeme Kanalı</th>
-                                        <th>İşlem Tutarı</th>
-                                        <th>Para Birimi</th>
-                                        <th>Açıklama</th>
-                                        <th>İşlem Yönü</th>
-                                        <th>İşlem Tarihi</th>
-                                        <th>İşlemler</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var transaction in Model.BankTransactionList.Data)
-                                    {
-                                        <tr>
-                                            <td>@transaction.Id</td>
-                                            @if (transaction.PaymentType == "Kredi Kartı")
-                                            {
-                                                foreach (var card in Model.CreditCardList.Data)
-                                                {
-                                                    if (card.Id == transaction.AccountId)
-                                                    {
-                                                        <td>@card.Name</td>
-                                                    }
-                                                }
-                                            }
-                                            else if (transaction.PaymentType == "Banka Kartı")
-                                            {
-                                                foreach (var card in Model.BankCardList.Data)
-                                                {
-                                                    if (card.Id == transaction.AccountId)
-                                                    {
-                                                        <td>@card.Name</td>
-                                                    }
-                                                    
-                                                }
-                                            }
-                                            else if (transaction.PaymentType == "Eft- Fast" || transaction.PaymentType == "Havale")
-                                            {
-                                                foreach (var account in Model.BankAccountList.Data)
-                                                {
-                                                    if (account.Id == transaction.AccountId)
-                                                    {
-                                                        <td>@account.Name</td>
-                                                    }
-                                                }
-                                            }
-                                            else
-                                            {
-                                                <td>Nakit</td>
-                                            }
-                                            <td>@transaction.Category</td>
-                                            <td>@transaction.PaymentType</td>
-                                            @if (transaction.TransactionType == "Gelir")
-                                            {
-                                                <td style="color:#3ad29f">+ @transaction.Amount</td>
-
-                                            }
-                                            @if (transaction.TransactionType == "Gider")
-                                            {
-                                                <td style="color:#dc3545;">- @transaction.Amount</td>
-
-                                            }
-                                            <td>@transaction.Currency</td>
-                                            <td>@transaction.Description</td>
-                                            @if (transaction.TransactionType == "Gelir")
-                                            {
-                                                <td style="color:#3ad29f"><span class="fe fe-arrow-up-circle fe-16 text-success"></span> @transaction.TransactionType</td>
-                                                
-                                            }
-                                            @if (transaction.TransactionType == "Gider")
-                                            {
-                                                <td style="color:#dc3545;"><span class="fe fe-arrow-down-circle fe-16 text-danger"></span> @transaction.TransactionType</td>
-
-                                            }
-                                            <td>@transaction.Date</td>
-                                            <td>
-                                                <a class="btn btn-outline-light" style="color:lawngreen" data-toggle="modal" data-target="#updateModal" data-id="@transaction.Id"><i class="fe fe-edit-2"></i></a>
-                                                <a class="btn btn-outline-light" style="color:deepskyblue" data-toggle="modal" data-target="#accountHistory" data-id="@transaction.Id"><i class="fe fe-repeat"></i></a>
-                                                <a class="btn btn-outline-light" style="color:orangered" data-toggle="modal" data-target="#deleteModal" data-id="@transaction.Id"><i class="fe fe-trash"></i></a>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
+            <!-- Özet Kartları -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="summary-card income">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Toplam Gelir</h6>
+                                <div class="summary-amount text-success">
+                                    @Model.BankTransactionList.Data.Where(x => x.TransactionType == "Gelir").Sum(x => x.Amount) TL
+                                </div>
+                            </div>
+                            <div class="transaction-type-icon income">
+                                <i class="fas fa-arrow-up"></i>
+                            </div>
                         </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="summary-card expense">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Toplam Gider</h6>
+                                <div class="summary-amount text-danger">
+                                    @Model.BankTransactionList.Data.Where(x => x.TransactionType == "Gider").Sum(x => x.Amount) TL
+                                </div>
+                            </div>
+                            <div class="transaction-type-icon expense">
+                                <i class="fas fa-arrow-down"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- İşlem Sekmeleri -->
+            <ul class="nav nav-tabs mb-4" id="transactionTabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="all-tab" data-toggle="tab" href="#all" role="tab">
+                        <i class="fas fa-list text-primary mr-2"></i>Tüm İşlemler
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="income-tab" data-toggle="tab" href="#income" role="tab">
+                        <i class="fas fa-arrow-up text-success mr-2"></i>Gelirler
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="expense-tab" data-toggle="tab" href="#expense" role="tab">
+                        <i class="fas fa-arrow-down text-danger mr-2"></i>Giderler
+                    </a>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="transactionTabContent">
+                <!-- Tüm İşlemler Sekmesi -->
+                <div class="tab-pane fade show active" id="all" role="tabpanel">
+                    <div class="row">
+                        @foreach (var transaction in Model.BankTransactionList.Data.OrderByDescending(x => x.Date))
+                        {
+                            <div class="col-12">
+                                <div class="card transaction-card @(transaction.TransactionType == "Gelir" ? "income" : "expense")">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="transaction-type-icon @(transaction.TransactionType == "Gelir" ? "income" : "expense")">
+                                                <i class="fas @(transaction.TransactionType == "Gelir" ? "fa-arrow-up" : "fa-arrow-down")"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="row align-items-center">
+                                                    <div class="col-md-3">
+                                                        <h6 class="mb-1">
+                                                            @if (transaction.PaymentType == "Kredi Kartı")
+                                                            {
+                                                                foreach (var card in Model.CreditCardList.Data)
+                                                                {
+                                                                    if (card.Id == transaction.AccountId)
+                                                                    {
+                                                                        @card.Name
+                                                                    }
+                                                                }
+                                                            }
+                                                            else if (transaction.PaymentType == "Banka Kartı")
+                                                            {
+                                                                foreach (var card in Model.BankCardList.Data)
+                                                                {
+                                                                    if (card.Id == transaction.AccountId)
+                                                                    {
+                                                                        @card.Name
+                                                                    }
+                                                                }
+                                                            }
+                                                            else if (transaction.PaymentType == "Eft- Fast" || transaction.PaymentType == "Havale")
+                                                            {
+                                                                foreach (var account in Model.BankAccountList.Data)
+                                                                {
+                                                                    if (account.Id == transaction.AccountId)
+                                                                    {
+                                                                        @account.Name
+                                                                    }
+                                                                }
+                                                            }
+                                                            else
+                                                            {
+                                                                <span>Nakit</span>
+                                                            }
+                                                        </h6>
+                                                        <small class="text-muted">@transaction.PaymentType</small>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <span class="badge badge-light">@transaction.Category</span>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <p class="mb-0 text-muted">@transaction.Description</p>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <span class="transaction-amount @(transaction.TransactionType == "Gelir" ? "income" : "expense")">
+                                                            @(transaction.TransactionType == "Gelir" ? "+" : "-") @transaction.Amount @transaction.Currency
+                                                        </span>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div class="text-muted d-block mb-2">@transaction.Date.ToString("dd MMM yyyy HH:mm")</div>
+                                                        <div class="action-buttons">
+                                                            <a class="btn btn-link p-0 mr-2" data-toggle="modal" data-target="#updateModal" data-id="@transaction.Id">
+                                                                <i class="fe fe-edit-2 text-success"></i>
+                                                            </a>
+                                                            <a class="btn btn-link p-0 mr-2" data-toggle="modal" data-target="#accountHistory" data-id="@transaction.Id">
+                                                                <i class="fe fe-repeat text-info"></i>
+                                                            </a>
+                                                            <a class="btn btn-link p-0" data-toggle="modal" data-target="#deleteModal" data-id="@transaction.Id">
+                                                                <i class="fe fe-trash text-danger"></i>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Gelirler Sekmesi -->
+                <div class="tab-pane fade" id="income" role="tabpanel">
+                    <div class="row">
+                        @foreach (var transaction in Model.BankTransactionList.Data.Where(x => x.TransactionType == "Gelir"))
+                        {
+                            <div class="col-12">
+                                <div class="card transaction-card income">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="transaction-type-icon income">
+                                                <i class="fas fa-arrow-up"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="row align-items-center">
+                                                    <div class="col-md-3">
+                                                        <h6 class="mb-1">
+                                                            @if (transaction.PaymentType == "Kredi Kartı")
+                                                            {
+                                                                foreach (var card in Model.CreditCardList.Data)
+                                                                {
+                                                                    if (card.Id == transaction.AccountId)
+                                                                    {
+                                                                        @card.Name
+                                                                    }
+                                                                }
+                                                            }
+                                                            else if (transaction.PaymentType == "Banka Kartı")
+                                                            {
+                                                                foreach (var card in Model.BankCardList.Data)
+                                                                {
+                                                                    if (card.Id == transaction.AccountId)
+                                                                    {
+                                                                        @card.Name
+                                                                    }
+                                                                }
+                                                            }
+                                                            else if (transaction.PaymentType == "Eft- Fast" || transaction.PaymentType == "Havale")
+                                                            {
+                                                                foreach (var account in Model.BankAccountList.Data)
+                                                                {
+                                                                    if (account.Id == transaction.AccountId)
+                                                                    {
+                                                                        @account.Name
+                                                                    }
+                                                                }
+                                                            }
+                                                            else
+                                                            {
+                                                                <span>Nakit</span>
+                                                            }
+                                                        </h6>
+                                                        <small class="text-muted">@transaction.PaymentType</small>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <span class="badge badge-light">@transaction.Category</span>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <p class="mb-0 text-muted">@transaction.Description</p>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <span class="transaction-amount income">
+                                                            + @transaction.Amount @transaction.Currency
+                                                        </span>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div class="action-buttons text-right">
+                                                            <a class="btn btn-link" data-toggle="modal" data-target="#updateModal" data-id="@transaction.Id">
+                                                                <i class="fe fe-edit-2 text-success"></i>
+                                                            </a>
+                                                            <a class="btn btn-link" data-toggle="modal" data-target="#accountHistory" data-id="@transaction.Id">
+                                                                <i class="fe fe-repeat text-info"></i>
+                                                            </a>
+                                                            <a class="btn btn-link" data-toggle="modal" data-target="#deleteModal" data-id="@transaction.Id">
+                                                                <i class="fe fe-trash text-danger"></i>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Giderler Sekmesi -->
+                <div class="tab-pane fade" id="expense" role="tabpanel">
+                    <div class="row">
+                        @foreach (var transaction in Model.BankTransactionList.Data.Where(x => x.TransactionType == "Gider"))
+                        {
+                            <div class="col-12">
+                                <div class="card transaction-card expense">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="transaction-type-icon expense">
+                                                <i class="fas fa-arrow-down"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="row align-items-center">
+                                                    <div class="col-md-3">
+                                                        <h6 class="mb-1">
+                                                            @if (transaction.PaymentType == "Kredi Kartı")
+                                                            {
+                                                                foreach (var card in Model.CreditCardList.Data)
+                                                                {
+                                                                    if (card.Id == transaction.AccountId)
+                                                                    {
+                                                                        @card.Name
+                                                                    }
+                                                                }
+                                                            }
+                                                            else if (transaction.PaymentType == "Banka Kartı")
+                                                            {
+                                                                foreach (var card in Model.BankCardList.Data)
+                                                                {
+                                                                    if (card.Id == transaction.AccountId)
+                                                                    {
+                                                                        @card.Name
+                                                                    }
+                                                                }
+                                                            }
+                                                            else if (transaction.PaymentType == "Eft- Fast" || transaction.PaymentType == "Havale")
+                                                            {
+                                                                foreach (var account in Model.BankAccountList.Data)
+                                                                {
+                                                                    if (account.Id == transaction.AccountId)
+                                                                    {
+                                                                        @account.Name
+                                                                    }
+                                                                }
+                                                            }
+                                                            else
+                                                            {
+                                                                <span>Nakit</span>
+                                                            }
+                                                        </h6>
+                                                        <small class="text-muted">@transaction.PaymentType</small>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <span class="badge badge-light">@transaction.Category</span>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <p class="mb-0 text-muted">@transaction.Description</p>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <span class="transaction-amount expense">
+                                                            - @transaction.Amount @transaction.Currency
+                                                        </span>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div class="action-buttons text-right">
+                                                            <a class="btn btn-link" data-toggle="modal" data-target="#updateModal" data-id="@transaction.Id">
+                                                                <i class="fe fe-edit-2 text-success"></i>
+                                                            </a>
+                                                            <a class="btn btn-link" data-toggle="modal" data-target="#accountHistory" data-id="@transaction.Id">
+                                                                <i class="fe fe-repeat text-info"></i>
+                                                            </a>
+                                                            <a class="btn btn-link" data-toggle="modal" data-target="#deleteModal" data-id="@transaction.Id">
+                                                                <i class="fe fe-trash text-danger"></i>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-
 
 <!-- Ekleme Modal -->
 <div class="modal fade" id="addRequestModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
@@ -154,14 +466,12 @@
                             <div class="form-row">
                                 <div class="form-group col-md-4">
                                     <label>Kredi Kartı</label>
-                                    <input name="BankTransaction.PaymentType" type="hidden" value="Kredi Kartı"/>
+                                    <input name="BankTransaction.PaymentType" type="hidden" value="Kredi Kartı" />
                                     <select name="BankTransaction.AccountId" class="form-control" required>
                                         <option value="">Kredi Kartı Seçin...</option>
                                         @foreach (var card in Model.CreditCardList.Data)
                                         {
-
                                             <option value="@card.Id">@card.Name (**** @card.Number.Substring(@card.Number.Length - 4))</option>
-
                                         }
                                     </select>
                                 </div>
@@ -190,6 +500,7 @@
                             </div>
                             <div class="card-footer text-right">
                                 <button type="submit" class="btn btn-primary">Kaydet</button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
                             </div>
                         </form>
                     </div>
@@ -211,7 +522,7 @@
                                 </div>
                                 <div class="form-group col-md-4">
                                     <label for="kategori2">Kategori</label>
-                                    <select name="BankTransaction.Type" id="kategori2" class="form-control" required>
+                                    <select name="BankTransaction.Category" id="kategori2" class="form-control" required>
                                         <option selected disabled>Seçin...</option>
                                         <option value="E-ticaret">E-ticaret</option>
                                         <option value="Vergi">Vergi</option>
@@ -235,6 +546,7 @@
                             </div>
                             <div class="card-footer text-right">
                                 <button type="submit" class="btn btn-primary">Kaydet</button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
                             </div>
                         </form>
                     </div>
@@ -263,7 +575,6 @@
                                         <option value="Fast">Fast</option>
                                         <option value="Fatura">Fatura</option>
                                         <option value="Vergi">Vergi</option>
-                                        <option value="Vergi">Vergi</option>
                                     </select>
                                 </div>
                                 <div class="form-group col-md-3">
@@ -285,13 +596,11 @@
                             </div>
                             <div class="card-footer text-right">
                                 <button type="submit" class="btn btn-primary">Kaydet</button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
                             </div>
                         </form>
                     </div>
                 </div>
-            </div>
-            <div class="card-footer text-right">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
             </div>
         </div>
     </div>
@@ -302,110 +611,86 @@
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content card my-4">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <strong>Kart Bilgilerini Güncelle</strong>
+                <strong>İşlem Güncelle</strong>
                 <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
             </div>
             <form action="@Url.Action("Update", "BankTransaction")" method="post">
                 <div class="card-body">
                     <div class="container-fluid">
                         <div class="row justify-content-center">
-                            <div class="col-12 col-xl-10">
-                                <input asp-for="BankTransaction.Id" id="updateId" type="hidden">
+                            <div class="col-12">
+                                <input type="hidden" id="updateId" name="BankTransaction.Id">
                                 <div class="form-row">
-                                    <div class="form-group col-md-3">
-                                        <label>Banka*</label>
-                                        <select name="Card.BankId" id="updateBankId" class="form-control" required>
-                                            <option value="">Banka Seçin...</option>
-                                            @foreach (var bank in Model.BankTransactionList.Data)
+                                    <div class="form-group col-md-4">
+                                        <label>Hesap</label>
+                                        <select name="BankTransaction.AccountId" id="updateAccountId" class="form-control" required>
+                                            <option value="">Hesap Seçin...</option>
+                                            @foreach (var account in Model.BankAccountList.Data)
                                             {
-                                                @if (bank.Category == "Banka")
-                                                {
-                                                    <option value="@bank.Id">@bank.Category</option>
-                                                }
-
+                                                <option value="@account.Id">@account.Name</option>
                                             }
                                         </select>
                                     </div>
-                                    <div class="form-group col-md-3">
-                                        <label for="custom-ipadd">Kart Numarası</label>
-                                        <input asp-for="BankTransaction.Id" class="form-control input-creditcard" id="updateCardNumber" placeholder="____-____-____-____" maxlength="16">
-                                    </div>
-                                    <div class="form-group col-md-3">
-                                        <label for="inputState5">Kart Tipi</label>
-                                        <select name="Card.CardType" id="updateCardType" class="form-control">
-                                            <option selected="">Seçin...</option>
-                                            <option value="Kredi Kartı">Kredi Kartı</option>
-                                            <option value="Banka Kartı">Banka Kartı</option>
+                                    <div class="form-group col-md-4">
+                                        <label>Kategori</label>
+                                        <select name="BankTransaction.Category" id="updateCategory" class="form-control" required>
+                                            <option value="">Seçin...</option>
+                                            <option value="E-ticaret">E-ticaret</option>
+                                            <option value="Vergi">Vergi</option>
+                                            <option value="Eğlence">Eğlence</option>
+                                            <option value="Market">Market</option>
+                                            <option value="Akaryakıt">Akaryakıt</option>
+                                            <option value="Fatura">Fatura</option>
+                                            <option value="Sağlık">Sağlık</option>
+                                            <option value="Diğer">Diğer</option>
                                         </select>
                                     </div>
-                                    <div class="form-group col-md-3">
-                                        <label for="inputState5">Sağlayıcı Ağ</label>
-                                        <select name="Card.CardNetwork" id="updateCardNetwork" class="form-control">
-                                            <option selected="">Seçin...</option>
-                                            <option value="Mastercard">Mastercard</option>
-                                            <option value="VISA">VISA</option>
-                                            <option value="TROY">TROY</option>
-                                            <option value="Paypal">Paypal</option>
-                                            <option value="American Express">American Express</option>
-                                        </select>
+                                    <div class="form-group col-md-4">
+                                        <label>Tutar</label>
+                                        <input name="BankTransaction.Amount" id="updateAmount" class="form-control input-money" required />
                                     </div>
                                 </div>
-                                <div class="form-row">
-                                    <div class="form-group col-md-3">
-                                        <label>SKT</label>
-                                        <input asp-for="BankTransaction.Id" id="updateExpiryDate" class="form-control input-card-skt" placeholder="10/2029" required />
-                                    </div>
-                                    <div class="form-group col-md-3">
-                                        <label>CVV</label>
-                                        <input asp-for="BankTransaction.Id" id="updateCvv" class="form-control input-card-cvv" required />
-                                    </div>
-                                    <div class="form-group col-md-3">
-                                        <label for="paraBirimi">Limit</label>
-                                        <input asp-for="BankTransaction.Id" id="updateCardLimit" class="form-control input-money" required />
-                                    </div>
-                                    <div class="form-group col-md-3">
-                                        <label for="paraBirimi">Kalan Limit</label>
-                                        <input asp-for="BankTransaction.Id" id="updateAvaliableCardLimit" class="form-control input-money" required />
-                                    </div>
+                                <div class="form-group">
+                                    <label>Açıklama</label>
+                                    <textarea name="BankTransaction.Description" id="updateDescription" class="form-control" rows="2"></textarea>
                                 </div>
-                                <div class="help-text text-muted">(*) Zorunlu alan</div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-outline-success">
-                        <span class="fe fe-send mr-2"></span>Kaydet
-                    </button>
+                    <button type="submit" class="btn btn-primary">Güncelle</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
 <!-- Silme Modalı -->
 <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="deleteLabel">Kart Sil</h5>
+                <h5 class="modal-title" id="deleteLabel">İşlem Sil</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">Sistemde kayıtlı işleminizi silmek üzeresiniz. Silmek istediğinizden emin misiniz?</div>
-
             <form method="post" asp-controller="BankTransaction" asp-action="Delete">
                 <input type="hidden" id="deleteId" name="id" value="" />
                 <div class="modal-footer">
-                    <button type="button" class="btn mb-2 btn-light" data-dismiss="modal">Kapat</button>
-                    <button type="submit" class="btn mb-2 btn-outline-danger">Hesabımı Sil</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-danger">Sil</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
 <!-- Hesap Hareketleri Modalı -->
-<div class="modal fade bd-example-modal-xl" id="accountHistory" tabindex="-1" role="dialog" aria-labelledby="myExtraLargeModalLabel" aria-hidden="true">
+<div class="modal fade" id="accountHistory" tabindex="-1" role="dialog" aria-labelledby="accountHistoryLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl" role="document">
         <div class="card my-4 modal-content">
             <div class="card-header d-flex justify-content-between align-items-center">
@@ -418,17 +703,9 @@
                 <h6 class="text-uppercase text-muted mb-4">Bugün</h6>
                 <div class="pb-3 timeline-item item-primary">
                     <div class="pl-5">
-                        <div class="mb-1"><strong>Emre Demir</strong><span class="text-muted small mx-2">adlı kişiye 100 TL para transferi yapıldı</span><strong>PARA TRANSFERİ</strong></div>
+                        <div class="mb-1"><strong>@Model.BankTransactionList.Data.FirstOrDefault()?.Description</strong></div>
                         <p class="small text-muted">
-                            Tarih <span class="badge badge-light">22 Nisan 2025 17:40:19</span>
-                        </p>
-                    </div>
-                </div>
-                <div class="pb-3 timeline-item item-warning">
-                    <div class="pl-5">
-                        <div class="mb-1"><strong>Sedef Polat</strong><span class="text-muted small mx-2">adlı kişiye 100 TL para transferi yapıldı</span><strong>PARA TRANSFERİ</strong></div>
-                        <p class="small text-muted">
-                            Tarih <span class="badge badge-light">22 Nisan 2025 17:40:19</span>
+                            Tarih <span class="badge badge-light">@Model.BankTransactionList.Data.FirstOrDefault()?.Date.ToString("dd MMMM yyyy HH:mm:ss")</span>
                         </p>
                     </div>
                 </div>
@@ -436,6 +713,7 @@
         </div>
     </div>
 </div>
+
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
@@ -443,48 +721,27 @@
     $(document).ready(function () {
         $('#deleteModal').on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget);
-            var accountId = button.data('id');
+            var id = button.data('id');
             var modal = $(this);
-            var hiddenInput = modal.find('#deleteId');
-            hiddenInput.val(accountId);
+            modal.find('#deleteId').val(id);
         });
     });
+
     // Güncelleme modalını doldur
-    var cards = @Html.Raw(Json.Serialize(Model.BankTransactionList.Data));
+    var transactions = @Html.Raw(Json.Serialize(Model.BankTransactionList.Data));
     $(document).on('click', '[data-target="#updateModal"]', function () {
         var id = $(this).data('id');
-        var selected = cards.find(x => x.id === id);
+        var selected = transactions.find(x => x.id === id);
 
         if (!selected) {
-            console.error("Kart bulunamadı");
+            console.error("İşlem bulunamadı");
             return;
         }
-        $('#updateModal select[name="Card.BankId"]').val(selected.bankId);
-        $('#updateModal select[name="Card.CardType"]').val(selected.cardType);
-        $('#updateModal select[name="Card.CardNetwork"]').val(selected.cardNetwork);
-        $('#updateModal input[name="Card.CardNetwork"]').val(selected.cardNetwork);
-        $('#updateModal input[name="Card.ExpiryDate"]').val(selected.expiryDate);
-        $('#updateModal input[name="Card.CVV"]').val(selected.cvv);
-        $('#updateModal input[name="Card.CardLimit"]').val(selected.cardLimit);
-        $('#updateModal input[name="Card.AvaliableCardLimit"]').val(selected.avaliableCardLimit);
-        $('#updateModal input[name="Card.CardNumber"]').val(selected.cardNumber);
+
+        $('#updateId').val(selected.id);
+        $('#updateAccountId').val(selected.accountId);
+        $('#updateCategory').val(selected.category);
+        $('#updateAmount').val(selected.amount);
+        $('#updateDescription').val(selected.description);
     });
 </script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

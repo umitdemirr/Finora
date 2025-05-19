@@ -37,6 +37,11 @@ public class BankAccountManager : IBankAccountService
         return new SuccessDataResult<List<BankAccountDetailDto>>(_bankAccountDal.GetAllBankAccountDetail(), Messages.UsersList);
     }
 
+    public IDataResult<List<BankAccountDetailDto>> GetAllBankAccountDetailByUserId(int userId)
+    {
+        return new SuccessDataResult<List<BankAccountDetailDto>>(_bankAccountDal.GetAllBankAccountDetailByUserId(userId), Messages.UsersList);
+    }
+
     public IResult Update(BankAccount bankAccount)
     {
         _bankAccountDal.Update(bankAccount);

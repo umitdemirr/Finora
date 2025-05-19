@@ -1,6 +1,263 @@
 ﻿@model BankAccountViewModel
 <link rel="stylesheet" href="~/css/dataTables.bootstrap4.css">
+<style>
+    .account-card {
+        background: var(--card-bg);
+        border-radius: 20px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        transition: all 0.3s ease;
+        margin-bottom: 25px;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+    }
 
+    .account-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+    }
+
+    .account-header {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: var(--white);
+        padding: 25px;
+        border-radius: 20px 20px 0 0;
+        position: relative;
+    }
+
+    .account-header h5,
+    .account-header .small {
+        color: var(--white) !important;
+    }
+
+    .account-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 150px;
+        height: 150px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+        border-radius: 50%;
+        transform: translate(50%, 50%);
+    }
+
+    .account-body {
+        padding: 25px;
+        background: var(--card-bg);
+        color: var(--text-color);
+    }
+
+    .balance-amount {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--primary);
+        margin: 10px 0;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .account-actions {
+        padding: 20px;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        background: var(--card-bg);
+    }
+
+    .action-btn {
+        padding: 10px;
+        border-radius: 12px;
+        margin: 0 8px;
+        transition: all 0.3s ease;
+        background: var(--card-bg);
+        border: none;
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .action-btn:hover {
+        transform: scale(1.1);
+    }
+
+    .action-btn.edit {
+        color: var(--white);
+        background: linear-gradient(135deg, #43c6ac, #28a745);
+    }
+
+    .action-btn.history {
+        color: var(--white);
+        background: linear-gradient(135deg, #2193b0, #0088cc);
+    }
+
+    .action-btn.delete {
+        color: var(--white);
+        background: linear-gradient(135deg, #ff416c, #dc3545);
+    }
+
+    .bank-icon {
+        font-size: 28px;
+        margin-right: 15px;
+        opacity: 0.9;
+        color: var(--white);
+    }
+
+    .iban-text {
+        font-family: 'Roboto Mono', monospace;
+        color: var(--text-muted);
+        font-size: 14px;
+        letter-spacing: 1px;
+        background: var(--input-bg);
+        padding: 8px 12px;
+        border-radius: 8px;
+        margin-top: 5px;
+    }
+
+    .add-account-btn {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: var(--white);
+        border: none;
+        padding: 12px 25px;
+        border-radius: 30px;
+        box-shadow: 0 4px 15px rgba(var(--primary-rgb), 0.3);
+        transition: all 0.3s ease;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    .add-account-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(var(--primary-rgb), 0.4);
+        color: var(--white);
+    }
+
+    .modal {
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+        background: var(--modal-bg);
+        border-radius: 20px;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        backdrop-filter: none;
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: var(--white);
+        border-radius: 20px 20px 0 0;
+        padding: 20px 30px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .modal-header .modal-title {
+        color: var(--white);
+        font-weight: 600;
+    }
+
+    .modal-header .close {
+        color: var(--white);
+        opacity: 0.8;
+        text-shadow: none;
+    }
+
+    .modal-header .close:hover {
+        opacity: 1;
+        color: var(--white);
+    }
+
+    .form-control {
+        background: var(--input-bg);
+        border-radius: 12px;
+        border: 2px solid var(--border-color);
+        padding: 12px;
+        transition: all 0.3s ease;
+        color: var(--text-color);
+    }
+
+    .form-control:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.2rem rgba(var(--primary-rgb), 0.25);
+        background: var(--input-bg);
+        color: var(--text-color);
+    }
+
+    .form-group label {
+        color: var(--text-color);
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+
+    .currency-badge {
+        background: rgba(var(--primary-rgb), 0.1);
+        color: var(--primary);
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-left: 8px;
+    }
+
+    .modal-body {
+        background: var(--modal-bg);
+        color: var(--text-color);
+        padding: 25px;
+    }
+
+    .modal-footer {
+        background: var(--modal-bg);
+        border-top: 1px solid var(--border-color);
+        border-radius: 0 0 20px 20px;
+        padding: 20px;
+    }
+
+    select.form-control {
+        background: var(--input-bg);
+        color: var(--text-color);
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236c757d' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        padding-right: 2.5rem;
+    }
+
+    select.form-control option {
+        background: var(--input-bg);
+        color: var(--text-color);
+        padding: 8px;
+    }
+
+    .help-text {
+        color: var(--text-muted);
+        font-size: 0.875rem;
+        margin-top: 4px;
+    }
+
+    .btn-outline-success {
+        color: var(--success);
+        border-color: var(--success);
+    }
+
+    .btn-outline-success:hover {
+        color: var(--white);
+        background-color: var(--success);
+        border-color: var(--success);
+    }
+
+    .text-muted {
+        color: var(--text-muted) !important;
+    }
+
+    .small {
+        color: var(--text-color);
+    }
+</style>
 
 <div class="container-fluid">
     <div class="row justify-content-center">
@@ -10,60 +267,58 @@
                     <h2 class="h3 mb-0 page-title">Hesaplarım</h2>
                 </div>
                 <div class="col-auto">
-                    <button type="button" class="btn btn-outline-success" data-toggle="modal" data-target="#addRequestModal">
-                        <span class="fe fe-plus mr-2"></span>Ekle
+                    <button type="button" class="add-account-btn" data-toggle="modal" data-target="#addRequestModal">
+                        <i class="fe fe-plus mr-2"></i>Yeni Hesap Ekle
                     </button>
                 </div>
             </div>
 
-            <div class="row my-4">
-                <div class="col-md-12">
-                    <div class="card shadow">
-                        <div class="card-body">
-                            <table class="table datatables" id="dataTable-1">
-                                <thead>
-                                    <tr>
-                                        <th>Id</th>
-                                        <th>Banka Adı</th>
-                                        <th>Hesap Adı</th>
-                                        <th>Para Birimi</th>
-                                        <th>IBAN</th>
-                                        <th>Bakiye</th>
-                                        <th>İşlemler</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var account in Model.BankAccountDetailList.Data)
-                                    {
-                                        <tr>
-                                            <td>@account.AccountId</td>
-                                            <td>@account.BankName</td>
-                                            <td>@account.AccountName</td>
-                                            <td>@account.CurrencyName</td>
-                                            <td>@account.Iban</td>
-                                            <td>@account.Balance</td>
-                                            <td>
-                                                <a class="btn btn-outline-light" style="color:lawngreen"
-                                                   data-toggle="modal"
-                                                   data-target="#updateModal"
-                                                   data-id="@account.AccountId"
-                                                   data-name="@account.AccountName"
-                                                   data-bankid="@account.BankId"
-                                                   data-accountno="@account.Iban"
-                                                   data-balance="@account.Balance"
-                                                   data-currencyid="@account.CurrencyId">
-                                                    <i class="fe fe-edit-2"></i>
-                                                </a>
-                                                <a class="btn btn-outline-light" style="color:deepskyblue" data-toggle="modal" data-target="#accountHistory" data-id="@account.AccountId"><i class="fe fe-repeat"></i></a>
-                                                <a class="btn btn-outline-light" style="color:orangered" data-toggle="modal" data-target="#deleteModal" data-id="@account.AccountId"><i class="fe fe-trash"></i></a>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
+            <div class="row">
+                @foreach (var account in Model.BankAccountDetailList.Data)
+                {
+                    <div class="col-md-6 col-lg-4">
+                        <div class="account-card">
+                            <div class="account-header">
+                                <div class="d-flex align-items-center">
+                                    <i class="fe fe-credit-card bank-icon"></i>
+                                    <div>
+                                        <h5 class="mb-1">@account.AccountName</h5>
+                                        <div class="small">@account.BankName</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="account-body">
+                                <div class="mb-3">
+                                    <div class="text-muted small">Bakiye</div>
+                                    <div class="balance-amount">@account.Balance?.ToString("N2") @account.CurrencyName</div>
+                                </div>
+                                <div>
+                                    <div class="text-muted small">IBAN</div>
+                                    <div class="iban-text">@account.Iban</div>
+                                </div>
+                            </div>
+                            <div class="account-actions text-center">
+                                <a class="btn action-btn edit"
+                                   data-toggle="modal"
+                                   data-target="#updateModal"
+                                   data-id="@account.AccountId"
+                                   data-name="@account.AccountName"
+                                   data-bankid="@account.BankId"
+                                   data-accountno="@account.Iban"
+                                   data-balance="@account.Balance"
+                                   data-currencyid="@account.CurrencyId">
+                                    <i class="fe fe-edit-2"></i>
+                                </a>
+                                <a class="btn action-btn history" data-toggle="modal" data-target="#accountHistory" data-id="@account.AccountId">
+                                    <i class="fe fe-repeat"></i>
+                                </a>
+                                <a class="btn action-btn delete" data-toggle="modal" data-target="#deleteModal" data-id="@account.AccountId">
+                                    <i class="fe fe-trash"></i>
+                                </a>
+                            </div>
                         </div>
                     </div>
-                </div>
+                }
             </div>
         </div>
     </div>
@@ -115,7 +370,6 @@
                                     </div>
                                     <div class="form-group col-md-3">
                                         <label for="paraBirimi">Para Birimi*</label>
-
                                         <select id="paraBirimi" name="BankAccount.CurrencyId" class="form-control" required>
                                             <option value="">Seçin...</option>
                                             @foreach (var currency in Model.CurrencyList.Data)
@@ -124,7 +378,6 @@
                                             }
                                         </select>
                                     </div>
-
                                 </div>
                                 <div class="help-text text-muted">(*) Zorunlu alan</div>
                             </div>
@@ -141,7 +394,7 @@
     </div>
 </div>
 
-<!-- Güncelleme Modalı -->
+<!-- Güncelleme Modal -->
 <div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true" data-keyboard="false">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content card my-4">
@@ -153,46 +406,44 @@
                 <div class="card-body">
                     <div class="container-fluid">
                         <div class="row justify-content-center">
-                            <div class="col-12 col-xl-10">
-                                <input type="hidden" name="BankAccount.Id" id="updateAccountId" />
-                                <div class="form-row">
-                                    <div class="form-group col-md-5">
-                                        <label>Banka*</label>
-                                        <select name="BankAccount.BankId" class="form-control" id="updateBankId" required>
-                                            <option value="">Banka Seçin...</option>
-                                            @foreach (var bank in Model.BankList.Data)
-                                            {
-                                                <option value="@bank.Id">@bank.Name</option>
-                                            }
-                                        </select>
-                                    </div>
-                                    <div class="form-group col-md-7">
-                                        <label>Hesap Adı*</label>
-                                        <input name="BankAccount.Name" id="updateAccountName" class="form-control" required />
-                                    </div>
+                            <input type="hidden" name="BankAccount.Id" id="updateAccountId" />
+                            <div class="form-row">
+                                <div class="form-group col-md-5">
+                                    <label>Banka*</label>
+                                    <select name="BankAccount.BankId" class="form-control" id="updateBankId" required>
+                                        <option value="">Banka Seçin...</option>
+                                        @foreach (var bank in Model.BankList.Data)
+                                        {
+                                            <option value="@bank.Id">@bank.Name</option>
+                                        }
+                                    </select>
                                 </div>
-                                <div class="form-row">
-                                    <div class="form-group col-md-5">
-                                        <label>IBAN*</label>
-                                        <input name="BankAccount.AccountNo" id="updateAccountNo" class="form-control" required />
-                                    </div>
-                                    <div class="form-group col-md-4">
-                                        <label>Bakiye*</label>
-                                        <input name="BankAccount.Balance" id="updateBalance" class="form-control input-money" required />
-                                    </div>
-                                    <div class="form-group col-md-3">
-                                        <label>Para Birimi*</label>
-                                        <select name="BankAccount.CurrencyId" class="form-control" id="updateCurrencyId" required>
-                                            <option value="">Seçin...</option>
-                                            @foreach (var currency in Model.CurrencyList.Data)
-                                            {
-                                                <option value="@currency.Id">@currency.Code</option>
-                                            }
-                                        </select>
-                                    </div>
+                                <div class="form-group col-md-7">
+                                    <label>Hesap Adı*</label>
+                                    <input name="BankAccount.Name" id="updateAccountName" class="form-control" required />
                                 </div>
-                                <div class="help-text text-muted">(*) Zorunlu alan</div>
                             </div>
+                            <div class="form-row">
+                                <div class="form-group col-md-5">
+                                    <label>IBAN*</label>
+                                    <input name="BankAccount.AccountNo" id="updateAccountNo" class="form-control" required />
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label>Bakiye*</label>
+                                    <input name="BankAccount.Balance" id="updateBalance" class="form-control input-money" required />
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label>Para Birimi*</label>
+                                    <select name="BankAccount.CurrencyId" class="form-control" id="updateCurrencyId" required>
+                                        <option value="">Seçin...</option>
+                                        @foreach (var currency in Model.CurrencyList.Data)
+                                        {
+                                            <option value="@currency.Id">@currency.Code</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="help-text text-muted">(*) Zorunlu alan</div>
                         </div>
                     </div>
                 </div>
@@ -204,7 +455,7 @@
     </div>
 </div>
 
-<!-- Silme Modalı -->
+<!-- Silme Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -227,7 +478,7 @@
     </div>
 </div>
 
-<!-- Hesap Hareketleri Modalı -->
+<!-- Hesap Hareketleri Modal -->
 <div class="modal fade bd-example-modal-xl" id="accountHistory" tabindex="-1" role="dialog" aria-labelledby="myExtraLargeModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl" role="document">
         <div class="card my-4 modal-content">
@@ -263,7 +514,6 @@
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
-
     // Silme modalına id gönder
     $(document).ready(function () {
         $('#deleteModal').on('show.bs.modal', function (event) {
@@ -275,11 +525,9 @@
         });
     });
 
-
-
     // Güncelleme modalını doldur
-       $('#updateModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget); // Tıklanan buton
+    $('#updateModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
         var modal = $(this);
 
         var id = button.data('id');
@@ -296,4 +544,4 @@
         modal.find('#updateBalance').val(balance);
         modal.find('#updateCurrencyId').val(currencyid);
     });
-</script>
+</script> 

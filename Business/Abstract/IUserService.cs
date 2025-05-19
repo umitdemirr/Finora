@@ -13,4 +13,5 @@ public interface IUserService
     IResult Update(User user);
     IResult Delete(User user);
     List<OperationClaim> GetClaims(User user);
+    IDataResult<List<UserDetailDto>> GetAllUserDetailByUserId(int userId);
 }

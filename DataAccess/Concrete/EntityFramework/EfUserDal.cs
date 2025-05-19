@@ -7,6 +7,24 @@ using Entities.DTOs;
 namespace DataAccess.Concrete.EntityFramework;
 public class EfUserDal : EfEntityRepositoryBase<User, PostgreDbContext>, IUserDal
 {
+    public List<UserDetailDto> GetAllUserDetailByUserId(int userId)
+    {
+        using (var context = new PostgreDbContext())
+        {
+            var result = from user in context.Users
+                         where user.Id == userId
+                         select new UserDetailDto
+                         {
+                             Id = user.Id,
+                             FirstName = user.FirstName,
+                             LastName = user.LastName,
+                             Mail = user.Mail
+                         };
+
+            return result.ToList();
+        }
+    }
+
     public List<OperationClaim> GetClaims(User user)
     {
         using (var context = new PostgreDbContext())

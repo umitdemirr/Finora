@@ -4,27 +4,35 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-// Screens
-import LoginScreen from '../screens/LoginScreen';
-import RegisterScreen from '../screens/RegisterScreen';
-import CardsScreen from '../screens/CardsScreen';
-import TransfersScreen from '../screens/TransfersScreen';
-import PaymentsScreen from '../screens/PaymentsScreen';
-import ProfileScreen from '../screens/ProfileScreen';
+// Auth Screens
+import LoginScreen from '../screens/auth/LoginScreen';
+import RegisterScreen from '../screens/auth/RegisterScreen';
+
+// Budget Screens
+import AccountsScreen from '../screens/budget/AccountsScreen';
+import AccountDetailScreen from '../screens/budget/AccountDetailScreen';
+import AddAccountScreen from '../screens/budget/AddAccountScreen';
+import CardsScreen from '../screens/budget/CardsScreen';
+import AddCardScreen from '../screens/budget/AddCardScreen';
+import AddCreditCardScreen from '../screens/budget/AddCreditCardScreen';
+import BudgetHomeScreen from '../screens/budget/BudgetHomeScreen';
+
+
+
+// Investment Screens
 import AssetDetailScreen from '../screens/investment/AssetDetailScreen';
 import TradeScreen from '../screens/investment/TradeScreen';
 import AnalysisScreen from '../screens/investment/AnalysisScreen';
 import PortfolioScreen from '../screens/investment/PortfolioScreen';
 
+// Bottom Tab Navigator Screeens
+import HomeScreen from '../screens/HomeScreen';
+import TransactionsScreen from '../screens/transactions/RecentTransactionsScreen';
+import ProfileScreen from '../screens/ProfileScreen';
+
+
 // Import screens
-import BudgetHomeScreen from '../screens/BudgetHomeScreen';
-import AccountsScreen from '../screens/AccountsScreen';
-import IncomeScreen from '../screens/IncomeScreen';
-import ExpenseScreen from '../screens/ExpenseScreen';
 import BillsScreen from '../screens/BillsScreen';
-import SavingsScreen from '../screens/SavingsScreen';
-import AccountDetailScreen from '../screens/AccountDetailScreen';
-import CardDetailScreen from '../screens/CardDetailScreen';
 
 
 // Create navigators
@@ -57,7 +65,7 @@ const TabNavigator = () => {
     >
       <Tab.Screen
         name="Home"
-        component={BudgetHomeScreen}
+        component={HomeScreen}
         options={{
           title: 'Ana Sayfa',
           tabBarIcon: ({ color, size }) => (
@@ -66,30 +74,20 @@ const TabNavigator = () => {
         }}
       />
       <Tab.Screen
-        name="Expenses"
-        component={ExpenseScreen}
+        name="BudgetHome"
+        component={BudgetHomeScreen}
         options={{
-          title: 'Giderler',
+          title: 'Bütçe Yönetimi',
           tabBarIcon: ({ color, size }) => (
-            <Icon name="cash-minus" size={size} color={color} />
+            <Icon name="home" size={size} color={color} />
           ),
         }}
       />
       <Tab.Screen
-        name="Income"
-        component={IncomeScreen}
+        name="Transactions"
+        component={TransactionsScreen}
         options={{
-          title: 'Gelirler',
-          tabBarIcon: ({ color, size }) => (
-            <Icon name="cash-plus" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Savings"
-        component={SavingsScreen}
-        options={{
-          title: 'Birikimler',
+          title: 'Son İşlemler',
           tabBarIcon: ({ color, size }) => (
             <Icon name="piggy-bank" size={size} color={color} />
           ),
@@ -100,6 +98,17 @@ const TabNavigator = () => {
         component={PortfolioScreen}
         options={{
           title: 'Yatırım',
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="chart-line" size={size} color={color} />
+          ),
+        }}
+      />
+
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          title: 'Profil',
           tabBarIcon: ({ color, size }) => (
             <Icon name="chart-line" size={size} color={color} />
           ),
@@ -144,24 +153,34 @@ const AppNavigator = () => {
           options={{ title: 'Hesaplarım' }}
         />
         <Stack.Screen
+          name="AccountDetail"
+          component={AccountDetailScreen}
+          options={{ title: 'Hesap Detayı' }}
+        />
+        <Stack.Screen
           name="Cards"
           component={CardsScreen}
           options={{ title: 'Kartlarım' }}
         />
         <Stack.Screen
-          name="Transfers"
-          component={TransfersScreen}
-          options={{ title: 'Transferler' }}
+          name="AddCard"
+          component={AddCardScreen}
+          options={{ title: 'Banka Kart Ekle' }}
         />
         <Stack.Screen
-          name="Payments"
-          component={PaymentsScreen}
-          options={{ title: 'Ödemeler' }}
+          name="AddCreditCard"
+          component={AddCreditCardScreen}
+          options={{ title: 'Kredi Kartı Ekle' }}
         />
         <Stack.Screen
           name="Profile"
           component={ProfileScreen}
           options={{ title: 'Profil' }}
+        />
+        <Stack.Screen
+          name="AddAccount"
+          component={AddAccountScreen}
+          options={{ title: 'Yeni Hesap Ekle' }}
         />
         <Stack.Screen
           name="AssetDetail"
@@ -195,16 +214,6 @@ const AppNavigator = () => {
             },
             headerTintColor: '#fff',
           }}
-        />
-        <Stack.Screen
-          name="AccountDetail"
-          component={AccountDetailScreen}
-          options={{ title: 'Hesap Detayı' }}
-        />
-        <Stack.Screen
-          name="CardDetail"
-          component={CardDetailScreen}
-          options={{ title: 'Kart Detayı' }}
         />
         <Stack.Screen
           name="Bills"

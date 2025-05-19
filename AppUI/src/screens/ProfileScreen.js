@@ -1,30 +1,86 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import api from '../services/api';
 
-const ProfileScreen = () => {
+const ProfileScreen = ({ navigation }) => {
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  const fetchUserData = async () => {
+    try {
+      const userId = await AsyncStorage.getItem('userId');
+      if (!userId) {
+        Alert.alert('Hata', 'Kullanıcı bilgileri alınamadı');
+        return;
+      }
+
+      const response = await api.get(`/User/getdetail?userId=${userId}`);
+      if (response.data.success && response.data.data.length > 0) {
+        setUserData(response.data.data[0]);
+      }
+    } catch (error) {
+      console.error('Kullanıcı bilgileri alınamadı:', error);
+      Alert.alert('Hata', 'Kullanıcı bilgileri yüklenirken bir hata oluştu');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await api.post('/Auth/logout');
+      
+      await AsyncStorage.removeItem('userToken');
+      await AsyncStorage.removeItem('userId');
+      await AsyncStorage.removeItem('tokenExpiration');
+      
+      navigation.replace('Login');
+    } catch (error) {
+      console.error('Çıkış yapılırken hata oluştu:', error);
+      Alert.alert('Hata', 'Çıkış yapılırken bir hata oluştu. Lütfen tekrar deneyin.');
+    }
+  };
+
   const profileOptions = [
     {
       id: 'personal',
       title: 'Kişisel Bilgiler',
       icon: 'account',
+      onPress: () => navigation.navigate('PersonalInfo', { userData })
     },
     {
       id: 'security',
       title: 'Güvenlik Ayarları',
       icon: 'shield-lock',
+      onPress: () => navigation.navigate('SecuritySettings')
     },
     {
       id: 'notifications',
       title: 'Bildirim Ayarları',
       icon: 'bell',
+      onPress: () => navigation.navigate('NotificationSettings')
     },
     {
       id: 'preferences',
       title: 'Tercihler',
       icon: 'cog',
+      onPress: () => navigation.navigate('Preferences')
     },
   ];
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -33,13 +89,17 @@ const ProfileScreen = () => {
           style={styles.profileImage}
           source={{ uri: 'https://via.placeholder.com/100' }}
         />
-        <Text style={styles.name}>Ümit Demir</Text>
-        <Text style={styles.email}>umit@example.com</Text>
+        <Text style={styles.name}>{userData?.firstName} {userData?.lastName}</Text>
+        <Text style={styles.email}>{userData?.mail}</Text>
       </View>
 
       <View style={styles.optionsContainer}>
         {profileOptions.map((option) => (
-          <TouchableOpacity key={option.id} style={styles.option}>
+          <TouchableOpacity 
+            key={option.id} 
+            style={styles.option}
+            onPress={option.onPress}
+          >
             <View style={styles.optionLeft}>
               <Icon name={option.icon} size={24} color="#007AFF" />
               <Text style={styles.optionTitle}>{option.title}</Text>
@@ -49,7 +109,7 @@ const ProfileScreen = () => {
         ))}
       </View>
 
-      <TouchableOpacity style={styles.logoutButton}>
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Icon name="logout" size={24} color="#FF3B30" />
         <Text style={styles.logoutText}>Çıkış Yap</Text>
       </TouchableOpacity>
@@ -61,6 +121,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   header: {
     backgroundColor: '#ffffff',
@@ -84,6 +149,7 @@ const styles = StyleSheet.create({
   email: {
     fontSize: 16,
     color: '#666',
+    marginBottom: 8,
   },
   optionsContainer: {
     backgroundColor: '#ffffff',
