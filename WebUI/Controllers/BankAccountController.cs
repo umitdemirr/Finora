@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Entities.DTOs;
+using Microsoft.AspNetCore.Mvc;
 using WebUI.Models;
 using WebUI.Models.Entities;
 using WebUI.Services;
@@ -21,7 +22,8 @@ public class BankAccountController : Controller
     public async Task<IActionResult> Index()
     {
         var model = new BankAccountViewModel();
-        model.BankAccountDetailList = _businessService.GetAll<BankAccountDetailDto>(ApiURL.GetBankAccountDetail).Result;
+        model.BankAccountDetailList = _businessService.GetAll<Models.BankAccountDetailDto>(ApiURL.GetBankAccountDetail).Result;
+        model.Transactions = _businessService.GetAll<BankTransaction>(ApiURL.BankTransactionGetAll).Result;
         model.BankList = _businessService.GetAll<BankAndExchange>(ApiURL.BankAndExchangeGetAll).Result;
         model.CurrencyList = _businessService.GetAll<Currency>(ApiURL.CurrencyGetAll).Result;
         return View(model);

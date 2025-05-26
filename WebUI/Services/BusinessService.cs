@@ -1,4 +1,5 @@
 ﻿using Core.Entities;
+using Core.Entities.Concrete;
 using Newtonsoft.Json;
 using System.Text;
 using WebUI.Models;
@@ -64,6 +65,24 @@ public class BusinessService
         var json = JsonConvert.SerializeObject(model);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
         var response = await _httpClient.PostAsync(url, content);
+        var responseString = await response.Content.ReadAsStringAsync();
+
+        var result = JsonConvert.DeserializeObject<AiViewModel>(responseString);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception($"API Hatası: {response.StatusCode} - {responseString}");
+        }
+
+        model.Answer = result.Answer;
+
+        return model;
+    }
+    public async Task<AiModelWithEntity<T>> AnalysisWithAI<T>(AiModelWithEntity<T> model)
+    {
+        var json = JsonConvert.SerializeObject(model);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        var response = await _httpClient.PostAsync(model.Url, content);
         var responseString = await response.Content.ReadAsStringAsync();
 
         var result = JsonConvert.DeserializeObject<AiViewModel>(responseString);

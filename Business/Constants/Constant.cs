@@ -9,5 +9,6 @@ public static class Constant
 
     public const string Income = "Gelir";
     public const string Expense = "Gider";
+    public const string Debit = "Debit";
     #endregion
 }

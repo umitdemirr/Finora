@@ -10,6 +10,7 @@ public class BankTransactionDetailDto : IDto
     public string? AccountName { get; set; }
     public string? Type { get; set; }
     public decimal Amount { get; set; }
+    public string PaymentType { get; set; }
     public string? TransactionType { get; set; }
     public string? Currency { get; set; }
     public string? Description { get; set; }

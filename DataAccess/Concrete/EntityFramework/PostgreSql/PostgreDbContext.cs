@@ -24,5 +24,5 @@ public class PostgreDbContext: DbContext
     public DbSet<Inflation> Inflations { get; set; }
     public DbSet<Portfolio> Portfolios { get; set; }
     public DbSet<StockAccount> StockAccounts { get; set; }
-    public DbSet<StockTransaction> StockTransactions { get; set; }
+    public DbSet<StockTransaction> StockTransaction { get; set; }
 }

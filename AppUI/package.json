@@ -21,6 +21,7 @@
     "axios": "^1.9.0",
     "date-fns": "^4.1.0",
     "expo": "~53.0.4",
+    "expo-linear-gradient": "~14.1.4",
     "expo-status-bar": "~2.2.3",
     "galio-framework": "^0.8.0",
     "lodash": "^4.17.21",
@@ -42,7 +43,10 @@
     "react-navigation": "^5.0.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0"
+    "@babel/core": "^7.20.0",
+    "@react-native-community/cli": "^18.0.0",
+    "@types/react": "~19.0.10",
+    "typescript": "~5.8.3"
   },
   "private": true
 }

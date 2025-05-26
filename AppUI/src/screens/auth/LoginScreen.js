@@ -17,6 +17,8 @@ import {
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../../services/api';
+import { LoginStyles as styles, colors } from '../../styles/LoginStyles';
+
 
 const { height } = Dimensions.get('window');
 
@@ -141,48 +143,54 @@ const LoginScreen = ({ navigation }) => {
       >
         <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
           <View style={styles.logoContainer}>
-            <Icon name="bank" size={80} color="#007AFF" />
+            <View style={styles.logo}>
+              <Icon name="bank" size={70} color={colors.auth.primary} />
+            </View>
             <Text style={styles.appName}>Finora</Text>
             <Text style={styles.appSlogan}>Finansal Özgürlüğünüz</Text>
           </View>
 
           <View style={styles.formContainer}>
             <View style={styles.inputContainer}>
-              <Icon name="email-outline" size={24} color="#666" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="E-posta"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                placeholderTextColor="#999"
-                editable={!isLoading}
-              />
+              <View style={styles.inputWrapper}>
+                <Icon name="email-outline" size={24} style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="E-posta"
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  placeholderTextColor={colors.text.placeholder}
+                  editable={!isLoading}
+                />
+              </View>
             </View>
 
             <View style={styles.inputContainer}>
-              <Icon name="lock-outline" size={24} color="#666" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Şifre"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry={!showPassword}
-                placeholderTextColor="#999"
-                editable={!isLoading}
-              />
-              <TouchableOpacity
-                style={styles.passwordToggle}
-                onPress={() => setShowPassword(!showPassword)}
-                disabled={isLoading}
-              >
-                <Icon
-                  name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                  size={24}
-                  color="#666"
+              <View style={styles.inputWrapper}>
+                <Icon name="lock-outline" size={24} style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Şifre"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword}
+                  placeholderTextColor={colors.text.placeholder}
+                  editable={!isLoading}
                 />
-              </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.passwordToggle}
+                  onPress={() => setShowPassword(!showPassword)}
+                  disabled={isLoading}
+                >
+                  <Icon
+                    name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                    size={24}
+                    color={colors.text.secondary}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
 
             <TouchableOpacity 
@@ -210,130 +218,21 @@ const LoginScreen = ({ navigation }) => {
               <View style={styles.dividerLine} />
             </View>
 
-            <TouchableOpacity
-              style={styles.registerButton}
-              onPress={() => navigation.navigate('Register')}
-              disabled={isLoading}
-            >
-              <Text style={styles.registerButtonText}>Yeni Hesap Oluştur</Text>
-            </TouchableOpacity>
+            <View style={styles.registerContainer}>
+              <Text style={styles.registerText}>Hesabınız yok mu?</Text>
+              <TouchableOpacity
+                style={styles.registerButton}
+                onPress={() => navigation.navigate('Register')}
+                disabled={isLoading}
+              >
+                <Text style={styles.registerButtonText}>Kayıt Ol</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </Animated.View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-    padding: 200,
-  },
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    padding: 20,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  logoContainer: {
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  appName: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#007AFF',
-    marginTop: 16,
-  },
-  appSlogan: {
-    fontSize: 16,
-    color: '#666',
-    marginTop: 8,
-  },
-  formContainer: {
-    width: '100%',
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f8f8f8',
-    borderRadius: 12,
-    marginBottom: 16,
-    paddingHorizontal: 16,
-    height: 56,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  inputIcon: {
-    marginRight: 12,
-  },
-  input: {
-    flex: 1,
-    fontSize: 16,
-    color: '#333',
-    height: 56,
-    padding: 0,
-    includeFontPadding: false,
-    textAlignVertical: 'center',
-  },
-  passwordToggle: {
-    padding: 4,
-  },
-  forgotPassword: {
-    alignSelf: 'flex-end',
-    marginBottom: 24,
-  },
-  forgotPasswordText: {
-    color: '#007AFF',
-    fontSize: 14,
-  },
-  loginButton: {
-    backgroundColor: '#007AFF',
-    height: 56,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 24,
-  },
-  loginButtonDisabled: {
-    backgroundColor: '#ccc',
-  },
-  loginButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 24,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#e0e0e0',
-  },
-  dividerText: {
-    color: '#666',
-    paddingHorizontal: 16,
-  },
-  registerButton: {
-    height: 56,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#007AFF',
-  },
-  registerButtonText: {
-    color: '#007AFF',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-});
 
 export default LoginScreen; 

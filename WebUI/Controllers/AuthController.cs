@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System.Text;
 using WebUI.Models;
+using WebUI.Services;
 
 namespace WebUI.Controllers;
 
@@ -22,7 +23,7 @@ public class AuthController : Controller
     [HttpPost]
     public async Task<IActionResult> LoginAsync(LoginViewModel model)
     {
-        string requestUrl = "https://localhost:44324/api/Auth/login";
+        string requestUrl = ApiURL.BaseUrl +"Auth/login";
         var json = JsonConvert.SerializeObject(model);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 

@@ -1,48 +1,181 @@
-﻿@model BankTransactionViewModel
+﻿@model SummaryViewModel
 
 <link rel="stylesheet" href="~/css/dataTables.bootstrap4.css">
 
 <style>
-    .summary-card {
-        border-radius: 15px;
-        transition: all 0.3s ease;
-        border: none;
-        background: var(--card-bg);
+    .expense-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+        padding: 1.5rem;
     }
-
-        .expense-stats {        background: linear-gradient(45deg, #ef5350, #d32f2f);        color: white;        border-radius: 15px;        padding: 20px;        margin-bottom: 20px;        box-shadow: 0 4px 20px rgba(239, 83, 80, 0.15);    }    .expense-stats .stat-item {        background: rgba(255, 255, 255, 0.1);        border-left: 4px solid #ff8a80;    }    .expense-stats .trend-indicator {        background: rgba(255, 255, 255, 0.15);        border: 1px solid rgba(255, 255, 255, 0.2);    }    .expense-stats .stat-value {        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);    }
 
     .stat-item {
-        padding: 15px;
-        border-radius: 10px;
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(5px);
+        background: white;
+        border-radius: 20px;
+        padding: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        border: 1px solid rgba(220, 53, 69, 0.1);
     }
 
-    .stat-value {
-        font-size: 1.8rem;
-        font-weight: 600;
-        margin: 10px 0;
+    .stat-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(220, 53, 69, 0.15);
+    }
+
+    .stat-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(45deg, rgba(220, 53, 69, 0.05), rgba(220, 53, 69, 0.1));
+        z-index: 0;
+    }
+
+    .stat-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: rgba(220, 53, 69, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        color: #dc3545;
+        font-size: 1.5rem;
     }
 
     .stat-label {
+        color: #6c757d;
         font-size: 0.9rem;
-        opacity: 0.9;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
     }
 
     .trend-indicator {
-        font-size: 0.8rem;
-        padding: 4px 8px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
         border-radius: 20px;
-        background: rgba(255, 255, 255, 0.2);
+        background: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+        font-size: 0.9rem;
+        font-weight: 500;
     }
 
-    .category-badge {
-        padding: 5px 10px;
+    .trend-indicator i {
+        font-size: 1rem;
+    }
+
+    .transaction-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        padding: 1rem;
+    }
+
+    .transaction-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .transaction-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    .transaction-header {
+        padding: 1.5rem;
+        background: linear-gradient(45deg, #f8f9fa, #ffffff);
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .transaction-amount {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #dc3545;
+    }
+
+    .transaction-category {
+        padding: 0.5rem 1rem;
         border-radius: 20px;
-        font-size: 0.8rem;
-        background: var(--expense-bg);
-        color: var(--expense);
+        font-size: 0.9rem;
+        background: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+    }
+
+    .transaction-body {
+        padding: 1.5rem;
+    }
+
+    .transaction-info {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f8f9fa;
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .info-value {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .transaction-footer {
+        padding: 1rem 1.5rem;
+        background: #f8f9fa;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+    }
+
+    .transaction-date {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .transaction-actions {
+        display: flex;
+        gap: 0.5rem;
     }
 
     .action-button {
@@ -53,7 +186,7 @@
         align-items: center;
         justify-content: center;
         transition: all 0.2s ease;
-        margin: 0 2px;
+        cursor: pointer;
     }
 
     .action-button:hover {
@@ -62,7 +195,7 @@
 
     .action-button.edit {
         background: rgba(58, 210, 159, 0.1);
-        color: var(--success);
+        color: #3ad29f;
     }
 
     .action-button.history {
@@ -75,291 +208,117 @@
         color: #ff6384;
     }
 
-    .table thead th {
-        border-bottom: 2px solid var(--border-color);
-        color: var(--text-muted);
-        font-weight: 600;
-        font-size: 0.85rem;
+    .page-header {
+        padding: 2rem 1rem;
+        background: linear-gradient(45deg, #f8f9fa, #ffffff);
+        margin-bottom: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     }
 
-    .table td {
-        border-top: 1px solid var(--border-color);
-        color: var(--text-color);
-        vertical-align: middle;
-    }
-
-    .amount-cell {
-        font-weight: 600;
-        font-size: 1.1rem;
-    }
-
-    .description-cell {
-        max-width: 250px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+    .page-title {
+        color: #2c3e50;
+        font-weight: 700;
+        margin: 0;
+        font-size: 2rem;
     }
 </style>
 
 <div class="container-fluid">
-    <div class="row justify-content-center">
-        <div class="col-12">
-            <div class="row align-items-center mb-4">
-                <div class="col">
-                    <h2 class="h3 page-title">Gider Yönetimi</h2>
-                </div>
-                <div class="col-auto">
-                    <button class="btn btn-danger" data-toggle="modal" data-target="#addExpenseModal">
-                        <i class="fe fe-plus fe-16 mr-2"></i>Yeni Gider Ekle
-                    </button>
-                </div>
-            </div>
+    <div class="page-header">
+        <h1 class="page-title">Giderlerim</h1>
+    </div>
 
-            <!-- Gider İstatistikleri -->
-            <div class="expense-stats mb-4">
-                <div class="row">
-                    <div class="col-md-3">
-                        <div class="stat-item">
-                            <div class="stat-label">Toplam Gider</div>
-                            <div class="stat-value">₺32,150.00</div>
-                            <div class="trend-indicator">
-                                <i class="fe fe-arrow-down-right"></i> %8.2
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="stat-item">
-                            <div class="stat-label">Aylık Ortalama</div>
-                            <div class="stat-value">₺10,716.67</div>
-                            <div class="trend-indicator">
-                                <i class="fe fe-arrow-down-right"></i> %5.1
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="stat-item">
-                            <div class="stat-label">En Yüksek Gider</div>
-                            <div class="stat-value">₺15,000.00</div>
-                            <div class="stat-label">Kira - Mart 2024</div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="stat-item">
-                            <div class="stat-label">Düzenli Giderler</div>
-                            <div class="stat-value">6</div>
-                            <div class="trend-indicator">Aylık</div>
-                        </div>
-                    </div>
+    <!-- Gider İstatistikleri -->
+    <div class="expense-stats">
+        <div class="stat-item">
+            <div class="stat-content">
+                <div class="stat-icon">
+                    <i class="fe fe-dollar-sign"></i>
                 </div>
-            </div>
-
-            <div class="card summary-card">
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table datatables" id="expenseTable">
-                            <thead>
-                                <tr>
-                                    <th>Açıklama</th>
-                                    <th>Kategori</th>
-                                    <th>Tarih</th>
-                                    <th>Tutar</th>
-                                    <th>İşlemler</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var expense in Model.BankTransactionList.Data)
-                                {
-                                    <tr>
-                                        <td class="description-cell">@expense.Description</td>
-                                        <td><span class="category-badge">@expense.Category</span></td>
-                                        <td>@(expense.Date != null ? ((DateTime)expense.Date).ToString("dd MMM yyyy") : "-")</td>
-                                        <td class="amount-cell" style="color: var(--expense)">
-                                            - @expense.Amount.ToString("N2") @expense.Currency
-                                            <i class="fe fe-trending-down ml-1"></i>
-                                        </td>
-                                        <td>
-                                            <a class="action-button edit" data-toggle="modal" data-target="#updateModal" data-id="@expense.Id">
-                                                <i class="fe fe-edit-2"></i>
-                                            </a>
-                                            <a class="action-button history" data-toggle="modal" data-target="#accountHistory" data-id="@expense.Id">
-                                                <i class="fe fe-repeat"></i>
-                                            </a>
-                                            <a class="action-button delete" data-toggle="modal" data-target="#deleteModal" data-id="@expense.Id">
-                                                <i class="fe fe-trash"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="stat-label">Toplam Gider</div>
+                <div class="stat-value">₺@Model.ToplamGider</div>
+                <div class="trend-indicator">
+                    <i class="fe fe-arrow-down-right"></i>
+                    Azalış
                 </div>
             </div>
         </div>
-    </div>
-</div>
-
-<!-- Gider Ekleme Modal -->
-<div class="modal fade" id="addExpenseModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Yeni Gider Ekle</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+        <div class="stat-item">
+            <div class="stat-content">
+                <div class="stat-icon">
+                    <i class="fe fe-trending-down"></i>
+                </div>
+                <div class="stat-label">Aylık Ortalama</div>
+                <div class="stat-value">₺@Model.AylıkOrtalamaGider</div>
+                <div class="trend-indicator">
+                    <i class="fe fe-arrow-down-right"></i>
+                    Azalış
+                </div>
             </div>
-            <form action="/BankTransaction/Add" method="post">
-                <div class="modal-body">
-                    <input type="hidden" name="TransactionType" value="Gider" />
-                    <div class="form-group">
-                        <label>Açıklama</label>
-                        <input type="text" class="form-control" name="Description" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Kategori</label>
-                        <select class="form-control" name="Category" required>
-                            <option value="">Seçiniz...</option>
-                            <option value="Market">Market</option>
-                            <option value="Fatura">Fatura</option>
-                            <option value="Kira">Kira</option>
-                            <option value="Ulaşım">Ulaşım</option>
-                            <option value="Sağlık">Sağlık</option>
-                            <option value="Eğitim">Eğitim</option>
-                            <option value="Eğlence">Eğlence</option>
-                            <option value="Diğer">Diğer</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Tutar</label>
-                        <input type="number" step="0.01" class="form-control" name="Amount" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Para Birimi</label>
-                        <select class="form-control" name="Currency" required>
-                            <option value="₺">Türk Lirası (₺)</option>
-                            <option value="$">Dolar ($)</option>
-                            <option value="€">Euro (€)</option>
-                        </select>
-                    </div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-content">
+                <div class="stat-icon">
+                    <i class="fe fe-alert-circle"></i>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
-                    <button type="submit" class="btn btn-danger">Kaydet</button>
-                </div>
-            </form>
+                <div class="stat-label">En Yüksek Gider</div>
+                <div class="stat-value">₺@Model.EnYüksekGider</div>
+                <div class="stat-label" style="color: #dc3545;"></div>
+
+            </div>
         </div>
     </div>
-</div>
 
-<!-- Gider Düzenleme Modal -->
-<div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Gider Düzenle</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+    <div class="transaction-grid">
+        @foreach (var expense in Model.BankTransactionList.Data)
+        {
+            <div class="transaction-card">
+                <div class="transaction-header">
+                    <div class="transaction-amount">
+                        - @expense.Amount.ToString("N2") @expense.Currency
+                    </div>
+                    <div class="transaction-category">
+                        @expense.Category
+                    </div>
+                </div>
+                <div class="transaction-body">
+                    <div class="transaction-info">
+                        <div class="info-item">
+                            <span class="info-label">Açıklama</span>
+                            <span class="info-value">@expense.Description</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Tarih</span>
+                            <span class="info-value">@(expense.Date != null ? ((DateTime)expense.Date).ToString("dd MMM yyyy") : "-")</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="transaction-footer">
+                    <div class="transaction-date">
+                        <i class="fe fe-calendar mr-1"></i>
+                        @(expense.Date != null ? ((DateTime)expense.Date).ToString("dd MMM yyyy") : "-")
+                    </div>
+                </div>
             </div>
-            <form action="/BankTransaction/Update" method="post">
-                <div class="modal-body">
-                    <input type="hidden" name="Id" id="updateId">
-                    <input type="hidden" name="TransactionType" value="Gider" />
-                    <div class="form-group">
-                        <label>Açıklama</label>
-                        <input type="text" class="form-control" name="Description" id="updateDescription" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Kategori</label>
-                        <select class="form-control" name="Category" id="updateCategory" required>
-                            <option value="">Seçiniz...</option>
-                            <option value="Market">Market</option>
-                            <option value="Fatura">Fatura</option>
-                            <option value="Kira">Kira</option>
-                            <option value="Ulaşım">Ulaşım</option>
-                            <option value="Sağlık">Sağlık</option>
-                            <option value="Eğitim">Eğitim</option>
-                            <option value="Eğlence">Eğlence</option>
-                            <option value="Diğer">Diğer</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Tutar</label>
-                        <input type="number" step="0.01" class="form-control" name="Amount" id="updateAmount" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Para Birimi</label>
-                        <select class="form-control" name="Currency" id="updateCurrency" required>
-                            <option value="₺">Türk Lirası (₺)</option>
-                            <option value="$">Dolar ($)</option>
-                            <option value="€">Euro (€)</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
-                    <button type="submit" class="btn btn-danger">Güncelle</button>
-                </div>
-            </form>
-        </div>
+        }
     </div>
 </div>
 
-<!-- Silme Modal -->
-<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Gider Sil</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <form action="/BankTransaction/Delete" method="post">
-                <div class="modal-body">
-                    <input type="hidden" name="Id" id="deleteId">
-                    <p>Bu gider kaydını silmek istediğinizden emin misiniz?</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
-                    <button type="submit" class="btn btn-danger">Sil</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- DataTables ve diğer gerekli scriptler -->
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap4.min.js"></script>
 <script>
     $(document).ready(function () {
-        $('#expenseTable').DataTable({
-            autoWidth: true,
-            "lengthMenu": [
-                [10, 20, 30, -1],
-                [10, 20, 30, "Tümü"]
-            ],
-            "language": {
-                "url": "//cdn.datatables.net/plug-ins/2.2.2/i18n/tr.json",
-                "decimal": ",",
-                "thousands": "."
-            }
-        });
-
         // Düzenleme modalını açarken verileri doldur
         $('#updateModal').on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget);
             var id = button.data('id');
-            var row = button.closest('tr');
+            var card = button.closest('.transaction-card');
             
-            var description = row.find('td:eq(0)').text();
-            var category = row.find('td:eq(1)').text();
-            var amount = row.find('td:eq(3)').text().replace(/[^0-9.,]/g, '');
-            var currency = row.find('td:eq(3)').text().replace(/[0-9., ]/g, '').trim();
+            var description = card.find('.info-value').first().text();
+            var category = card.find('.transaction-category').text();
+            var amount = card.find('.transaction-amount').text().replace(/[^0-9.,]/g, '');
+            var currency = card.find('.transaction-amount').text().replace(/[0-9., ]/g, '').trim();
 
             $('#updateId').val(id);
             $('#updateDescription').val(description);

@@ -3,10 +3,14 @@
     public static class ApiURL
     {
         public const string BaseUrl = "https://localhost:44324/api/";
+        
+
 
         #region Auth Endpoint Urls
         public const string Login = BaseUrl + "Auth/login";
-
+        public const string AI = BaseUrl + "Ai/simple-prompt";
+        public const string InvestAnalysis = BaseUrl + "Ai/invest-analysis";
+        public const string BudgetAnalysis = BaseUrl + "Ai/budget-analysis";
         #endregion
 
         #region BankAccount Endpoint Urls
@@ -49,11 +53,42 @@
 
         #region BankTransaction Endpoint Urls
         public const string BankTransactionGetAll = BaseUrl + "BankTransaction/getall";
-        public const string BankTransactionGetGetDetail = BaseUrl + "BankTransaction/getdetail";
+        public const string BankTransactionGetDetail = BaseUrl + "BankTransaction/getdetail";
         public const string BankTransactionUpdate = BaseUrl + "BankTransaction/update";
         public const string BankTransactionAdd = BaseUrl + "BankTransaction/add";
         public const string BankTransactionDelete = BaseUrl + "BankTransaction/delete";
         #endregion
 
+        #region StockAccount Endpoint Urls
+        public const string StockAccountGetAll = BaseUrl + "StockAcount/getall";
+        public const string StockAccountUpdate = BaseUrl + "StockAcount/update";
+        public const string StockAccountAdd = BaseUrl + "StockAcount/add";
+        public const string StockAccountDelete = BaseUrl + "StockAcount/delete";
+        public const string GetStockAccountDetail = BaseUrl + "StockAcount/getdetail";
+        public const string GetStockAccountDetailByUserId = BaseUrl + "StockAcount/getdetailbyuserid";
+        #endregion
+
+        #region Portfolio Endpoint Urls
+        public const string PortfolioGetAll = BaseUrl + "Portfolio/getall";
+        public const string PortfolioUpdate = BaseUrl + "Portfolio/update";
+        public const string PortfolioAdd = BaseUrl + "Portfolio/add";
+        public const string PortfolioDelete = BaseUrl + "Portfolio/delete";
+        public const string GetPortfolioDetail = BaseUrl + "Portfolio/getdetail";
+        public const string GetPortfolioDetailByUserId = BaseUrl + "Portfolio/getdetailbyuserid";
+        #endregion
+
+        #region StockTransaction Endpoint Urls
+        public const string StockTransactionGetAll = BaseUrl + "StockTransaction/getall";
+        public const string StockTransactionUpdate = BaseUrl + "StockTransaction/update";
+        public const string StockTransactionAdd = BaseUrl + "StockTransaction/add";
+        public const string StockTransactionDelete = BaseUrl + "StockTransaction/delete";
+        public const string GetStockTransactionDetail = BaseUrl + "StockTransaction/getdetail";
+        public const string GetStockTransactionDetailByUserId = BaseUrl + "StockTransaction/getdetailbyuserid";
+        #endregion
+
+        #region Asset Endpoint Urls
+        public const string AssetGetAll = BaseUrl + "Asset/getall";
+        public const string AssetDetailByUserId = BaseUrl + "Asset/getbyuserid";
+        #endregion
     }
 }

@@ -14,6 +14,7 @@ public class CreditCard : IEntity
     public string CVV { get; set; }
     public decimal Limit { get; set; }
     public decimal AvaliableLimit { get; set; }
+    public int StatementClosingDate { get; set; }
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }

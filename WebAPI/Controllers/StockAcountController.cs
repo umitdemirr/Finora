@@ -26,6 +26,26 @@ public class StockAcountController : ControllerBase
         }
         return BadRequest(result);
     }
+    [HttpGet("getdetail")]
+    public IActionResult GetDetails()
+    {
+        var result = _stockAccountService.GetAllStockAccountDetail();
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+        return BadRequest(result);
+    }
+    [HttpGet("getdetailbyuserid")]
+    public IActionResult GetDetailsByUserId(int userId)
+    {
+        var result = _stockAccountService.GetAllStockAccountDetailByUserId(userId);
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+        return BadRequest(result);
+    }
 
     [HttpPost("add")]
     public IActionResult Add(StockAccount stockAccount)

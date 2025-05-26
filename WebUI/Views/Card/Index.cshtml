@@ -4,14 +4,13 @@
 <style>
     .card-container {
         perspective: 1000px;
-        margin-bottom: 30px;
     }
 
     .credit-card {
         background: linear-gradient(135deg, #1e88e5, #1565c0);
         border-radius: 15px;
         padding: 25px;
-        width: 100%;
+        width: 400px;
         height: 250px;
         position: relative;
         margin-bottom: 20px;
@@ -35,7 +34,7 @@
     }
 
     .bank-card {
-        background: linear-gradient(135deg, #43a047, #2e7d32);
+        background: linear-gradient(135deg, #ff0000, #6d0500);
     }
 
     .virtual-card {
@@ -118,7 +117,7 @@
 
     .limit-info {
         position: absolute;
-        bottom: 45px;
+        margin-top: 40px;
         left: 25px;
         color: white;
     }
@@ -126,7 +125,6 @@
     .available-limit {
         font-size: 1.1em;
         font-weight: 500;
-        margin-top: 3px;
     }
 
     .limit-bar {
@@ -178,34 +176,7 @@
         transform: scale(1.1);
     }
 
-    .nav-tabs {
-        border-bottom: 2px solid var(--border-color);
-        margin-bottom: 30px;
-    }
-
-    .nav-tabs .nav-link {
-        border: none;
-        color: var(--text-muted);
-        font-weight: 500;
-        padding: 12px 20px;
-        transition: all 0.3s;
-        position: relative;
-    }
-
-    .nav-tabs .nav-link.active {
-        color: var(--primary);
-        background: transparent;
-    }
-
-    .nav-tabs .nav-link.active::after {
-        content: '';
-        position: absolute;
-        bottom: -2px;
-        left: 0;
-        width: 100%;
-        height: 2px;
-        background: var(--primary);
-    }
+   
 
     .add-card-btn {
         background: linear-gradient(45deg, var(--success), #43a047);
@@ -240,68 +211,6 @@
         color: var(--text-color);
     }
 
-    [data-theme="dark"] .card-body {
-        background: var(--card-bg);
-    }
-
-    [data-theme="dark"] .nav-tabs .nav-link:not(.active) {
-        color: var(--text-muted);
-    }
-
-    /* Dark theme adjustments */
-    .dark .card.shadow {
-        background: #2d3748;
-    }
-
-    .dark .nav-tabs {
-        border-bottom-color: #4a5568;
-    }
-
-    .dark .nav-tabs .nav-link {
-        color: #a0aec0;
-    }
-
-    .dark .nav-tabs .nav-link.active {
-        color: #90caf9;
-        background: transparent;
-    }
-
-    .dark .card-header {
-        background: #2d3748;
-        border-bottom-color: #4a5568;
-    }
-
-    .dark .modal-content {
-        background: #2d3748;
-        border-color: #4a5568;
-    }
-
-    .dark .modal-header {
-        border-bottom-color: #4a5568;
-    }
-
-    .dark .modal-footer {
-        border-top-color: #4a5568;
-    }
-
-    .dark .form-control {
-        background-color: #1a202c;
-        border-color: #4a5568;
-        color: #e2e8f0;
-    }
-
-    .dark .form-control:focus {
-        background-color: #2d3748;
-        border-color: #90caf9;
-        color: #e2e8f0;
-    }
-
-    .text-muted {
-        color: rgba(255, 255, 255, 0.7) !important;
-        font-size: 0.75em;
-        font-weight: 500;
-        margin-bottom: 3px;
-    }
 </style>
 
 <div class="container-fluid">
@@ -338,7 +247,7 @@
                                     <div class="row">
                                         @foreach (var card in Model.CreditCardDetailList.Data)
                                         {
-                                            <div class="col-md-6 col-lg-4">
+                                            <div class="col-md-4 col-lg-4">
                                                 <div class="card-container">
                                                     <div class="credit-card">
                                                         <div class="card-chip"></div>
@@ -349,28 +258,48 @@
                                                             <span>@card.CardNumber.Substring(Math.Max(0, card.CardNumber.Length - 4))</span>
                                                         </div>
                                                         <div class="card-details">
-                                                            <div>
-                                                                <div class="text-muted">KART SAHİBİ</div>
+
+                                                                <div>
+                                                                    <div class="text-muted">KART SAHİBİ</div>
                                                                 <div class="card-holder">@card.Name</div>
-                                                            </div>
-                                                            <div>
-                                                                <div class="text-muted">SON KULLANIM</div>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                     <div class="text-muted">SKT</div>
                                                                 <div class="card-expires">@card.ExpiryDate</div>
+                                                                </div>
+                                                            <div>
+                                                                <div class="limit-info">
+                                                                <div class="text-muted small mb-1">Kullanılabilir Limit</div>
+                                                                <div class="available-limit">@card.AvaliableLimit.ToString("N2") ₺</div>
                                                             </div>
+                                                        </div>
                                                         </div>
                                                         <div class="card-type">
-                                                            <img src="~/images/card-brands/@(card.Provider?.ToLower() ?? "generic").png" alt="@card.Provider" style="height: 30px; width: auto;" />
+                                                           <h5 style="color:white">@card.Provider</h5>
                                                         </div>
-                                                        <div class="limit-info">
-                                                            <div class="text-muted small mb-1">Kullanılabilir Limit</div>
-                                                            <div class="available-limit">@card.AvaliableLimit.ToString("N2") ₺</div>
-                                                        </div>
+
+
                                                         <div class="limit-bar">
-                                                            <div class="limit-progress" style="width: @(((card.AvaliableLimit / card.Limit) * 100).ToString())%"></div>
+                                                            @{
+                                                                var progress = card.Limit != 0 ? (card.AvaliableLimit / card.Limit) * 100 : 0;
+                                                            }
+                                                            <div class="limit-progress" style="width: @(progress.ToString("F2"))%"></div>
+
                                                         </div>
                                                         <div class="card-actions">
-                                                            <button class="action-btn" data-toggle="modal" data-target="#updateModal"
-                                                                    data-id="@card.Id" data-name="@card.Name" data-bankid="@card.BankId">
+                                                            <button class="action-btn"
+                                                                    data-toggle="modal"
+                                                                    data-target="#ccUpdateModal"
+                                                                    data-id="@card.Id"
+                                                                    data-bankid="@card.BankId"
+                                                                    data-name="@card.Name"
+                                                                    data-cardnumber="@card.CardNumber"
+                                                                    data-cardtype="creditcard"
+                                                                    data-provider="@card.Provider"
+                                                                    data-expirydate="@card.ExpiryDate"
+                                                                    data-cvv="@card.CVV"
+                                                                    data-cardlimit="@card.Limit"
+                                                                    data-avaliablelimit="@card.AvaliableLimit">
                                                                 <i class="fe fe-edit-2"></i>
                                                             </button>
                                                             <button class="action-btn" data-toggle="modal" data-target="#accountHistory" data-id="@card.Id">
@@ -390,7 +319,7 @@
                                     <div class="row">
                                         @foreach (var card in Model.BankCardDetailList.Data)
                                         {
-                                            <div class="col-md-6 col-lg-4">
+                                            <div class="col-md-4 col-lg-4">
                                                 <div class="card-container">
                                                     <div class="credit-card bank-card">
                                                         <div class="card-chip"></div>
@@ -406,18 +335,29 @@
                                                                 <div class="card-holder">@card.CardName</div>
                                                             </div>
                                                             <div>
-                                                                <div class="text-muted">SON KULLANIM</div>
+                                                                <div class="text-muted">SKT</div>
                                                                 <div class="card-expires">@card.ExpiryDate</div>
                                                             </div>
                                                         </div>
                                                         <div class="card-type">
-                                                            <img src="~/images/card-brands/@(card.Provider?.ToLower() ?? "generic").png" alt="@card.Provider" style="height: 30px; width: auto;" />
+                                                            <h5 style="color:white">@card.Provider</h5>
                                                         </div>
                                                         <div class="card-actions">
-                                                            <button class="action-btn" data-toggle="modal" data-target="#updateModal"
-                                                                    data-id="@card.Id" data-name="@card.CardName" data-bankid="@card.BankId">
+                                                            <button class="action-btn"
+                                                                    data-toggle="modal"
+                                                                    data-target="#dcUpdateModal"
+                                                                    data-id="@card.Id"
+                                                                    data-bankid="@card.BankId"
+                                                                    data-cardnumber="@card.CardNumber"
+                                                                    data-cardtype="Test"
+                                                                    data-provider="@card.Provider"
+                                                                    data-expirydate="@card.ExpiryDate"
+                                                                    data-cvv="@card.CVV"
+                                                                    data-cardlimit="@card.CardLimit"
+                                                                    data-avaliablelimit="@card.AvaliableCardLimit">
                                                                 <i class="fe fe-edit-2"></i>
                                                             </button>
+
                                                             <button class="action-btn" data-toggle="modal" data-target="#accountHistory" data-id="@card.Id">
                                                                 <i class="fe fe-repeat"></i>
                                                             </button>
@@ -591,7 +531,6 @@
                             </div>
                         </form>
                     </div>
-
                 </div>
             </div>
 
@@ -599,7 +538,7 @@
     </div>
 </div>
 <!-- Güncelleme Modalı -->
-<div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true" data-keyboard="false">
+<div class="modal fade" id="dcUpdateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true" data-keyboard="false">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content card my-4">
             <div class="card-header d-flex justify-content-between align-items-center">
@@ -617,7 +556,7 @@
                                         <label>Banka*</label>
                                         <select name="Card.BankId" id="updateBankId" class="form-control" required>
                                             <option value="">Banka Seçin...</option>
-                                            @foreach (var bank in Model.Accounts.Data)
+                                            @foreach (var bank in Model.Banks.Data)
                                             {
                                                 <option value="@bank.Id">@bank.Name</option>
                                             }
@@ -627,14 +566,75 @@
                                         <label for="custom-ipadd">Kart Numarası</label>
                                         <input asp-for="Card.Number" class="form-control input-creditcard" id="updateCardNumber" placeholder="____-____-____-____" maxlength="16">
                                     </div>
-                                    <div class="form-group col-md-3">
-                                        <label for="inputState5">Kart Tipi</label>
-                                        <select name="Card.CardType" id="updateCardType" class="form-control">
+                                    <div class="form-group col-md-2">
+                                        <label for="inputState5">Sağlayıcı Ağ</label>
+                                        <select name="Card.Provider" id="updateCardNetwork" class="form-control">
                                             <option selected="">Seçin...</option>
-                                            <option value="Kredi Kartı">Kredi Kartı</option>
-                                            <option value="Banka Kartı">Banka Kartı</option>
+                                            <option value="Mastercard">Mastercard</option>
+                                            <option value="VISA">VISA</option>
+                                            <option value="TROY">TROY</option>
+                                            <option value="Paypal">Paypal</option>
+                                            <option value="American Express">American Express</option>
                                         </select>
                                     </div>
+                                    <div class="form-group col-md-2">
+                                        <label>SKT</label>
+                                        <input asp-for="Card.ExpiryDate" id="updateExpiryDate" class="form-control input-card-skt" placeholder="10/2029" required />
+                                    </div>
+                                    <div class="form-group col-md-2">
+                                        <label>CVV</label>
+                                        <input asp-for="Card.CVV" id="updateCvv" class="form-control input-card-cvv" required />
+                                    </div>
+                                </div>
+                                <div class="help-text text-muted">(*) Zorunlu alan</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-outline-success">
+                        <span class="fe fe-send mr-2"></span>Kaydet
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Kredi Kartı Güncelleme Modalı -->
+<div class="modal fade" id="ccUpdateModal" tabindex="-1" role="dialog" aria-labelledby="ccUpdateModalLabel" aria-hidden="true" data-keyboard="false">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content card my-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <strong>Kredi Kartı Bilgilerini Güncelle</strong>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <form action="@Url.Action("Update", "Card")" method="post">
+                <div class="card-body">
+                    <div class="container-fluid">
+                        <div class="row justify-content-center">
+                            <div class="col-12 col-xl-10">
+                                <input asp-for="Card.Id" id="updateId" type="hidden">
+                                <div class="form-row">
+                                    <div class="form-group col-md-3">
+                                        <label>Banka*</label>
+                                        <select name="Card.BankId" id="updateBankId" class="form-control" required>
+                                            <option value="">Banka Seçin...</option>
+                                            @foreach (var bank in Model.Banks.Data)
+                                            {
+                                                <option value="@bank.Id">@bank.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                     <div class="form-group col-md-3">
+                                        <label>Kart Adı</label>
+                                        <input asp-for="Card.Name" id="updateName" class="form-control" required />
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label for="custom-ipadd">Kart Numarası</label>
+                                        <input asp-for="Card.Number" class="form-control input-creditcard" id="updateCardNumber" placeholder="____-____-____-____" maxlength="16">
+                                    </div>
+                                     <input asp-for="Card.Type" id="updateCardType" type="hidden">
                                     <div class="form-group col-md-3">
                                         <label for="inputState5">Sağlayıcı Ağ</label>
                                         <select name="Card.Provider" id="updateCardNetwork" class="form-control">
@@ -747,73 +747,35 @@
         });
     });
 
+    $('#ccUpdateModal').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget); 
+    var modal = $(this);
 
-    $(document).ready(function () {
-    $('#dataTable-creditCard').DataTable();
-    $('#dataTable-bankCard').DataTable();
-    $('#dataTable-virtualCard').DataTable();
+    modal.find('#updateId').val(button.data('id'));
+    modal.find('#updateBankId').val(button.data('bankid'));
+    modal.find('#updateCardNumber').val(button.data('cardnumber'));
+    modal.find('#updateName').val(button.data('name'));
+    modal.find('#updateCardType').val(button.data('cardtype'));
+    modal.find('#updateCardNetwork').val(button.data('provider'));
+    modal.find('#updateExpiryDate').val(button.data('expirydate'));
+    modal.find('#updateCvv').val(button.data('cvv'));
+    modal.find('#updateCardLimit').val(button.data('cardlimit'));
+    modal.find('#updateAvaliableCardLimit').val(button.data('avaliablelimit'));
 });
 
-    // Güncelleme modalını doldur
-    $('#updateModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget); // Tıklanan buton
+     $('#dcUpdateModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
         var modal = $(this);
 
-        var id = button.data('id');
-        var bankid = button.data('bankid');
-        var cardnumber = button.data('cardnumber');
-        var cardnetwork = button.data('provider');
-        var expirydate = button.data('expirydate');
-        var cvv = button.data('cvv');
-        var cardlimit = button.data('cardlimit');
-        var avaliablelimit = button.data('avaliablelimit');
-
-        modal.find('#updateId').val(id);
-        modal.find('#updateBankId').val(bankid);
-        modal.find('#updateCardNumber').val(cardnumber);
-        modal.find('#updateCardNetwork').val(cardnetwork);
-        modal.find('#updateExpiryDate').val(expirydate);
-        modal.find('#updateCvv').val(cvv);
-        modal.find('#updateLimit').val(cardlimit);
-        modal.find('#updateAvaliableLimit').val(avaliablelimit);
+        modal.find('#updateId').val(button.data('id'));
+        modal.find('#updateBankId').val(button.data('bankid'));
+        modal.find('#updateCardNumber').val(button.data('cardnumber'));
+        modal.find('#updateName').val(button.data('name'));
+        modal.find('#updateCardType').val(button.data('cardtype'));
+        modal.find('#updateCardNetwork').val(button.data('provider'));
+        modal.find('#updateExpiryDate').val(button.data('expirydate'));
+        modal.find('#updateCvv').val(button.data('cvv'));
+        modal.find('#updateCardLimit').val(button.data('cardlimit'));
+        modal.find('#updateAvaliableCardLimit').val(button.data('avaliablelimit'));
     });
 </script>
-
-
-
-
-
-
-
-@*
-
-
-<div class="row">
-    @foreach (var card in Model.CreditCardDetailList.Data)
-    {
-        <div class="creditcard">
-            <div class="creditcard-inner">
-                <div class="creditcard-front">
-                    <div class="creditcard-bg"></div>
-                    <div class="creditcard-glow"></div>
-                    <svg width="72" height="24" viewBox="0 0 72 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="creditcard-logo">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M52.3973 1.01093L51.5588 5.99054C49.0448 4.56717 43.3231 4.23041 43.3231 6.85138C43.3231 7.89285 44.6177 8.60913 46.178 9.47241C48.5444 10.7817 51.5221 12.4291 51.5221 16.062C51.5221 21.8665 45.4731 24 41.4645 24C37.4558 24 34.8325 22.6901 34.8325 22.6901L35.7065 17.4848C38.1115 19.4688 45.4001 20.032 45.4001 16.8863C45.4001 15.5645 43.9656 14.785 42.3019 13.8811C40.0061 12.6336 37.2742 11.1491 37.2742 7.67563C37.2742 1.30988 44.1978 0 47.1132 0C49.8102 0 52.3973 1.01093 52.3973 1.01093ZM66.6055 23.6006H72L67.2966 0.414276H62.5732C60.3923 0.414276 59.8612 2.14215 59.8612 2.14215L51.0996 23.6006H57.2234L58.4481 20.1566H65.9167L66.6055 23.6006ZM60.1406 15.399L63.2275 6.72235L64.9642 15.399H60.1406ZM14.7942 16.3622L20.3951 0.414917H26.7181L17.371 23.6012H11.2498L6.14551 3.45825C2.83215 1.41281 0 0.807495 0 0.807495L0.108643 0.414917H9.36816C11.9161 0.414917 12.1552 2.50314 12.1552 2.50314L14.1313 12.9281L14.132 12.9294L14.7942 16.3622ZM25.3376 23.6006H31.2126L34.8851 0.414917H29.0095L25.3376 23.6006Z" fill="white" />
-                    </svg>
-                    <div class="creditcard-contactless">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="46" height="56">
-                            <path fill="none" stroke="#f9f9f9" stroke-width="6" stroke-linecap="round" d="m35,3a50,50 0 0,1 0,50M24,8.5a39,39 0 0,1 0,39M13.5,13.55a28.2,28.50 0,1 0,28.5M3,19a18,17 0 0,1 0,18" />
-                        </svg>
-                    </div>
-                    <div class="creditcard-chip"></div>
-                    <div class="creditcard-holder">@card.UserName</div>
-                    <div class="creditcard-number">@card.CardNumber</div>
-                    <div class="creditcard-valid">@card.ExpiryDate</div>
-                </div>
-                <div class="creditcard-back">
-                    <div class="creditcard-signature"></div>
-                    <div class="creditcard-seccode">@card.CVV</div>
-                </div>
-            </div>
-        </div>
-    }
-</div> *@

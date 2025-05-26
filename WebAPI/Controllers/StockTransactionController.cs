@@ -1,6 +1,5 @@
 ﻿using Business.Abstract;
 using Entities.Concrete;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers;
@@ -20,6 +19,27 @@ public class StockTransactionController : ControllerBase
     public IActionResult Get()
     {
         var result = _stockTransactionService.GetAll();
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+        return BadRequest(result);
+    }
+    [HttpGet("getdetail")]
+    public IActionResult GetDetails()
+    {
+        var result = _stockTransactionService.GetAllStockTransactionDetail();
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+        return BadRequest(result);
+    }
+
+    [HttpGet("getdetailbyuserid")]
+    public IActionResult GetDetailsByUserId(int userId)
+    {
+        var result = _stockTransactionService.GetAllStockTransactionDetailByUserId(userId);
         if (result.Success)
         {
             return Ok(result);

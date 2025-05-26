@@ -1,0 +1,403 @@
+﻿@model StockAccountViewModel
+<link rel="stylesheet" href="~/css/dataTables.bootstrap4.css">
+<style>
+    .account-card {
+        background: var(--card-bg);
+        border-radius: 20px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        transition: all 0.3s ease;
+        margin-bottom: 25px;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        margin : 5px;
+        padding: 0px;
+        height: 100%;
+
+    }
+
+    .account-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+    }
+
+    .account-header {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: var(--white);
+        padding: 15px 0px 0px 15px;
+        border-radius: 20px 20px 0 0;
+        position: relative;
+    }
+
+    .account-header h5,
+    .account-header .small {
+        color: gray !important;
+    }
+
+    .account-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 150px;
+        height: 150px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+        border-radius: 50%;
+        transform: translate(50%, 50%);
+    }
+
+    .account-body {
+        padding: 0px 10px 0px 15px;
+        background: var(--card-bg);
+        color: var(--text-color);
+    }
+
+    .balance-amount {
+        font-size: 25px;
+        font-weight: 700;
+        color: var(--primary);
+        margin: 5px 0 0 0 ;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .account-actions {
+        padding: 10px;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        justify-content: end;
+        align-items: center;
+        background: var(--card-bg);
+    }
+
+    .action-btn {
+        padding: 10px;
+        border-radius: 12px;
+        margin: 0 8px;
+        transition: all 0.3s ease;
+        background: var(--card-bg);
+        border: none;
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .action-btn:hover {
+        transform: scale(1.1);
+    }
+
+    .action-btn.edit {
+        color: var(--white);
+        background: linear-gradient(135deg, #43c6ac, #28a745);
+    }
+
+    .action-btn.history {
+        color: var(--white);
+        background: linear-gradient(135deg, #2193b0, #0088cc);
+    }
+
+    .action-btn.delete {
+        color: var(--white);
+        background: linear-gradient(135deg, #ff416c, #dc3545);
+    }
+
+    .bank-icon {
+        font-size: 30px;
+        margin-right: 15px;
+        opacity: 0.9;
+        color: gray
+    }
+
+    .iban-text {
+        font-family: 'Roboto Mono', monospace;
+        color: var(--text-muted);
+        font-size: 14px;
+        letter-spacing: 1px;
+        background: var(--input-bg);
+        border-radius: 8px;
+        margin-top: 5px;
+    }
+
+    .add-account-btn {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color:gray;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 30px;
+        box-shadow: 0 4px 15px rgba(var(--primary-rgb), 0.3);
+        transition: all 0.3s ease;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    .add-account-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(var(--primary-rgb), 0.4);
+        color: var(--success);
+        border: 1px solid var(--success);
+    }
+
+
+</style>
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-12">
+            <div class="row align-items-center my-4">
+                <div class="col">
+                    <h2 class="h3 mb-0 page-title">Borsa Hesaplarım</h2>
+                </div>
+                <div class="col-auto">
+                    <button type="button" class="add-account-btn" data-toggle="modal" data-target="#addModal">
+                        <i class="fe fe-plus mr-2"></i>Hesap Ekle
+                    </button>
+                </div>
+            </div>
+
+            <div class="row">
+                @foreach (var account in Model.AccountDetails.Data)
+                {
+                    <div class="col-md-6 col-lg-4" style="margin-top:15px">
+                        <div class="account-card">
+                            <div class="account-header">
+                                <div class="d-flex align-items-center">
+                                    <i class="fe fe-credit-card bank-icon"></i>
+                                    <div>
+                                        <h5 class="mb-1">@account.ExchangeName</h5>
+                                        <div class="small">@account.AccountNo <i class="fe fe-copy" style="color:var(--primary);"></i></div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="account-body">
+                                <div>
+                                    <div class="text-muted small">Bakiye</div>
+                                    <div class="balance-amount">@account.Balance.ToString("N2") @account.Currency</div>
+                                </div>
+                            </div>
+                            <div class="account-actions">
+                                <a class="btn action-btn edit"
+                                   data-toggle="modal"
+                                   data-target="#updateModal"
+                                   data-id="@account.Id"
+                                   data-bankid="@account.ExchangeId"
+                                   data-accountno="@account.AccountNo"
+                                   data-balance="@account.Balance">
+                                    <i class="fe fe-edit-2"></i>
+                                </a>
+                                <a class="btn action-btn history" data-toggle="modal" data-target="#accountHistory" data-id="account.AccountId">
+                                    <i class="fe fe-repeat"></i>
+                                </a>
+                                <a class="btn action-btn delete" data-toggle="modal" data-target="#deleteModal" data-id="@account.Id">
+                                    <i class="fe fe-trash"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ekleme Modal -->
+<div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="card my-4 modal-content">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <strong>Hesap Ekle</strong>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="@Url.Action("Add", "StockAccount")" method="post">
+                <div class="card-body">
+                    <div class="container-fluid">
+                        <div class="row justify-content-center">
+                            <div class="col-12 col-xl-10">
+                                <div class="form-row">
+                                    <div class="form-group col-md-4">
+                                        <label>Borsa</label>
+                                        <select name="MyAccount.ExchangeId" class="form-control" required>
+                                            <option value="">Borsa Seçin...</option>
+                                            @foreach (var bank in Model.BankList.Data)
+                                            {
+                                                @if (bank.Type == "Borsa")
+                                                {
+                                                    <option value="@bank.Id">@bank.Name</option>
+                                                }
+                                                @if (bank.Type == "Kripto")
+                                                {
+                                                    <option value="@bank.Id">@bank.Name</option>
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label>Hesap Numarası</label>
+                                        <input asp-for="MyAccount.AccountNo" class="form-control" required />
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label>Bakiye</label>
+                                        <input asp-for="MyAccount.Balance" class="form-control input-money" required />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-outline-success">
+                        <span class="fe fe-send mr-2"></span>Kaydet
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Güncelleme Modalı -->
+<div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true" data-keyboard="false">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content card my-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <strong>Hesap Güncelle</strong>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <form action="@Url.Action("Update", "StockAccount")" method="post">
+                <div class="card-body">
+                    <div class="container-fluid">
+                        <div class="row justify-content-center">
+                            <div class="col-12 col-xl-10">
+                                <div class="form-row">
+                                    <div class="form-group col-md-4">
+                                        <label>Borsa</label>
+                                        <input type="hidden" name="MyAccount.Id" id="updateid" />
+                                        <select name="MyAccount.ExchangeId" id="updateBankId" class="form-control" required>
+                                            <option value="">Borsa Seçin...</option>
+                                            @foreach (var bank in Model.BankList.Data)
+                                            {
+                                                @if (bank.Type == "Borsa")
+                                                {
+                                                    <option value="@bank.Id">@bank.Name</option>
+                                                }
+                                                @if (bank.Type == "Kripto")
+                                                {
+                                                    <option value="@bank.Id">@bank.Name</option>
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label>Hesap Numarası</label>
+                                        <input asp-for="MyAccount.AccountNo" class="form-control" id="updateAccountNo" required />
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label>Bakiye</label>
+                                        <input asp-for="MyAccount.Balance" class="form-control input-money" id="updateBalance" required />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-outline-success">
+                        <span class="fe fe-send mr-2"></span>Kaydet
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Silme Modalı -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteLabel">Borsa Hesabını Sil</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">Sistemde kayıtlı borsa hesabınızı silmek üzeresiniz. Silmek istediğinizden emin misiniz?</div>
+
+            <form method="post" asp-controller="StockAccount" asp-action="Delete">
+                <input type="hidden" id="deleteId" name="id" value="" />
+                <div class="modal-footer">
+                    <button type="button" class="btn mb-2 btn-light" data-dismiss="modal">Kapat</button>
+                    <button type="submit" class="btn mb-2 btn-outline-danger">Hesabımı Sil</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Hesap Hareketleri Modalı -->
+<div class="modal fade bd-example-modal-xl" id="accountHistory" tabindex="-1" role="dialog" aria-labelledby="myExtraLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="card my-4 modal-content">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <strong>Hesap Hareketleri</strong>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="card-body" data-simplebar="init" style="height:750px; overflow-y: auto; overflow-x: hidden;">
+                <h6 class="text-uppercase text-muted mb-4">Bugün</h6>
+                <div class="pb-3 timeline-item item-primary">
+                    <div class="pl-5">
+                        <div class="mb-1"><strong>Emre Demir</strong><span class="text-muted small mx-2">adlı kişiye 100 TL para transferi yapıldı</span><strong>PARA TRANSFERİ</strong></div>
+                        <p class="small text-muted">
+                            Tarih <span class="badge badge-light">22 Nisan 2025 17:40:19</span>
+                        </p>
+                    </div>
+                </div>
+                <div class="pb-3 timeline-item item-warning">
+                    <div class="pl-5">
+                        <div class="mb-1"><strong>Sedef Polat</strong><span class="text-muted small mx-2">adlı kişiye 100 TL para transferi yapıldı</span><strong>PARA TRANSFERİ</strong></div>
+                        <p class="small text-muted">
+                            Tarih <span class="badge badge-light">22 Nisan 2025 17:40:19</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+
+    // Silme modalına id gönder
+    $(document).ready(function () {
+        $('#deleteModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var accountId = button.data('id');
+            var modal = $(this);
+            var hiddenInput = modal.find('#deleteId');
+            hiddenInput.val(accountId);
+        });
+    });
+
+
+
+    // Güncelleme modalını doldur
+    $('#updateModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget); // Tıklanan buton
+        var modal = $(this);
+
+        var id = button.data('id');
+        var bankid = button.data('bankid');
+        var accountno = button.data('accountno');
+        var balance = button.data('balance');
+
+        modal.find('#updateid').val(id);
+        modal.find('#updateBankId').val(bankid);
+        modal.find('#updateAccountNo').val(accountno);
+        modal.find('#updateBalance').val(balance);
+    });
+</script>

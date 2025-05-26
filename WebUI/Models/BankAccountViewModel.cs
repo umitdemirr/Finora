@@ -1,4 +1,5 @@
-﻿using WebUI.Models.Entities;
+﻿using Entities.DTOs;
+using WebUI.Models.Entities;
 
 namespace WebUI.Models;
 
@@ -13,6 +14,7 @@ public class BankAccountViewModel
     public Result<List<Currency>>? CurrencyList { get; set; }
 
     public Result<List<BankAccountDetailDto>>? BankAccountDetailList { get; set; }
+    public Result<List<BankTransaction>>? Transactions { get; set; }
     public BankAccountDetailDto? BankAccountDetail { get; set; }
 
 }

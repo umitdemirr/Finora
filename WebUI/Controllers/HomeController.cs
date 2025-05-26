@@ -1,7 +1,7 @@
+using Entities.Concrete;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using WebUI.Models;
-using WebUI.Models.Entities;
 using WebUI.Services;
 
 namespace WebUI.Controllers
@@ -27,13 +27,51 @@ namespace WebUI.Controllers
             var model = new HomeViewModel();
             model.BankAccountDetail = _businessService.GetAll<BankAccountDetailDto>(ApiURL.GetBankAccountDetail).Result;
             model.BankTransactions = _businessService.GetAll<BankTransaction>(ApiURL.BankTransactionGetAll).Result;
+            model.Varliklarim = _businessService.GetAll<Entities.Concrete.Asset>(ApiURL.AssetGetAll).Result;
 
             model.TotalMoney += model.BankAccountDetail.Data.Sum(account => account.Balance);
             model.TotalExpanse = model.BankTransactions.Data.Where(t => t.TransactionType == "Gider").Sum(t => t.Amount);
             model.TotalIncome = model.BankTransactions.Data.Where(t => t.TransactionType == "Gelir").Sum(t => t.Amount);
             model.NetWorth = model.TotalIncome - model.TotalExpanse;
 
+            var groupedData = model.BankTransactions.Data
+                .Where(t => t.TransactionType == "Gider" || t.TransactionType == "Debit")
+                .GroupBy(x => x.Category)
+                .Select(g => new{Category = g.Key,TotalAmount = g.Sum(x => x.Amount)})
+                .ToList();
 
+            var totalAmount = groupedData.Sum(x => x.TotalAmount);
+            var categoryRatios = groupedData
+                .Select(x => new CategoryRatioDto{Category = x.Category,TotalAmount = x.TotalAmount,Percentage = totalAmount > 0 ? Math.Round((double)(x.TotalAmount / totalAmount * 100), 2) : 0})
+                .ToList();
+
+            model.Harcamalar = categoryRatios;
+
+
+            List<AssetRatioDto> GetDistribution(string type)
+            {
+                var filtered = model.Varliklarim.Data
+                    .Where(x => x.AssetType == type)
+                    .GroupBy(x => x.Sembol)
+                    .Select(g => new
+                    {
+                        Symbol = g.Key,
+                        Total = g.Sum(x => x.AlisToplam)
+                    })
+                    .ToList();
+
+                var total = filtered.Sum(x => x.Total);
+
+                return filtered.Select(x => new AssetRatioDto
+                {
+                    Symbol = x.Symbol,
+                    TotalValue = x.Total,
+                    Percentage = total > 0 ? Math.Round((double)(x.Total / total * 100), 2) : 0
+                }).ToList();
+            }
+            model.StockDagilimi = GetDistribution("STOCK");
+            model.CryptoDagilimi = GetDistribution("CRYPTO");
+            model.EmtiaDagilimi = GetDistribution("EMTIA");
 
 
 

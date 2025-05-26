@@ -1,0 +1,806 @@
+﻿@model StockTransactionViewModel
+<link rel="stylesheet" href="~/css/dataTables.bootstrap4.css">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
+<style>
+    .transaction-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+        padding: 1rem;
+    }
+
+    .transaction-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .transaction-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    .transaction-header {
+        padding: 1.5rem;
+        background: linear-gradient(45deg, #f8f9fa, #ffffff);
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .transaction-symbol {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+    }
+
+    .transaction-type {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .type-buy {
+        background-color: rgba(58, 210, 159, 0.1);
+        color: #3ad29f;
+    }
+
+    .type-sell {
+        background-color: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+    }
+
+    .transaction-body {
+        padding: 1.5rem;
+    }
+
+    .transaction-info {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .info-label {
+        color: #6c757d;
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .info-value {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .transaction-footer {
+        padding: 1rem 1.5rem;
+        background: #f8f9fa;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .transaction-status {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .status-pending {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .status-filled {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .status-cancelled {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .status-rejected {
+        background-color: #e2e3e5;
+        color: #383d41;
+    }
+
+    .transaction-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .action-button {
+        padding: 0.5rem;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .action-button:hover {
+        background-color: rgba(0,0,0,0.05);
+    }
+
+    .edit-button {
+        color: #3ad29f;
+    }
+
+    .delete-button {
+        color: #dc3545;
+    }
+
+    .summary-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        padding: 0 1rem;
+    }
+
+    .summary-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .summary-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .summary-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .summary-amount {
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .summary-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .icon-buy {
+        background-color: rgba(58, 210, 159, 0.1);
+        color: #3ad29f;
+    }
+
+    .icon-sell {
+        background-color: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+    }
+
+    .page-header {
+        padding: 2rem 1rem;
+        background: linear-gradient(45deg, #f8f9fa, #ffffff);
+        margin-bottom: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .page-title {
+        color: #2c3e50;
+        font-weight: 700;
+        margin: 0;
+        font-size: 2rem;
+    }
+
+    .add-button {
+        background: #3ad29f;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .add-button:hover {
+        background: #2bc187;
+        transform: translateY(-2px);
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="page-header">
+        <h1 class="page-title">Emirlerim</h1>
+        <button type="button" class="add-button" data-toggle="modal" data-target="#addRequestModal">
+            <i class="fas fa-plus"></i>
+            Yeni İşlem Ekle
+        </button>
+    </div>
+
+    <div class="summary-section">
+        <div class="summary-card">
+            <div class="summary-info">
+                <span class="summary-label">Toplam Alış</span>
+                <span class="summary-amount text-success">
+                    @Model.StockTransactionList.Data.Where(x => x.Type == "BUY").Sum(x => x.Price * x.Quantity).ToString("N2") TL
+                </span>
+            </div>
+            <div class="summary-icon icon-buy">
+                <i class="fas fa-arrow-up"></i>
+            </div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-info">
+                <span class="summary-label">Toplam Satış</span>
+                <span class="summary-amount text-danger">
+                    @Model.StockTransactionList.Data.Where(x => x.Type == "SOLD").Sum(x => x.Price * x.Quantity).ToString("N2") TL
+                </span>
+            </div>
+            <div class="summary-icon icon-sell">
+                <i class="fas fa-arrow-down"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="transaction-grid">
+        @foreach (var transaction in Model.StockTransactionList.Data)
+        {
+            var statusClass = transaction.Status?.ToLowerInvariant() switch
+            {
+                "pending" => "status-pending",
+                "cancelled" => "status-cancelled",
+                "rejected" => "status-rejected",
+                "filled" => "status-filled",
+                _ => ""
+            };
+
+            <div class="transaction-card">
+                <div class="transaction-header">
+                    <div class="transaction-symbol">@transaction.StockSymbol</div>
+                    <div class="transaction-type @(transaction.Type == "BUY" ? "type-buy" : "type-sell")">
+                        @(transaction.Type == "BUY" ? "ALIŞ" : "SATIŞ")
+                    </div>
+                </div>
+                <div class="transaction-body">
+                    <div class="transaction-info">
+                        <div class="info-item">
+                            <span class="info-label">Varlık Adı</span>
+                            <span class="info-value">@transaction.Name</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Varlık Tipi</span>
+                            <span class="info-value">@transaction.AssetType</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">İşlem Fiyatı</span>
+                            <span class="info-value">@transaction.Price.ToString("N2") TL</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Miktar</span>
+                            <span class="info-value">@transaction.Quantity</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Toplam Tutar</span>
+                            <span class="info-value">@((transaction.Price * transaction.Quantity).ToString("N2")) TL</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="transaction-footer">
+                    <div class="transaction-status @statusClass">
+                        @transaction.Status
+                    </div>
+                    <div class="transaction-actions">
+                        <a class="action-button edit-button" data-toggle="modal" data-target="#updateModal" data-id="@transaction.Id">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a class="action-button delete-button" data-toggle="modal" data-target="#deleteModal" data-id="@transaction.Id">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Ekleme Modal -->
+<div class="modal fade" id="addRequestModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <strong>Emir Ekle</strong>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="card-body">
+                <ul class="nav nav-pills mb-3" id="pills-tab2" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="pills-home-tab1" data-toggle="pill" href="#pills1" role="tab" aria-controls="pills1" aria-selected="true">
+                            <span class="fe fe-16 fe-activity"></span> Hisse Senedi/Fon
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="pills-profile-tab2" data-toggle="pill" href="#pills2" role="tab" aria-controls="pills2" aria-selected="false">
+                            <span class="fe fe-16 fe-activity"></span> Kripto
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="pills-contact-tab3" data-toggle="pill" href="#pills3" role="tab" aria-controls="pills3" aria-selected="false">
+                            <span class="fe fe-16 fe-activity"></span> Emtia
+                        </a>
+                    </li>
+                </ul>
+                <div class="tab-content" id="pills-tabContent2">
+                    <!-- Hisse Senedi/Fon Formu -->
+                    <div class="tab-pane fade show active" id="pills1" role="tabpanel">
+                        <form asp-action="Add" asp-controller="StockTransaction" method="post">
+                            <input name="StockTransaction.AssetType" type="hidden" value="STOCK" />
+                            <div class="form-row">
+                                <div class="form-group col-md-2">
+                                    <label>Yatırım Hesabım</label>
+                                    <select name="StockTransaction.StockAccountId" class="form-control" required>
+                                        <option value="">Hesap Seçin...</option>
+                                        @foreach (var account in Model.StockAccountList.Data)
+                                        {
+                                            <option value="@account.Id">@account.ExchangeName</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>Hisse/Fon Adı</label>
+
+                                    <select name="StockId" class="form-control" required>
+                                        <option value="">Hisse/Fon Seçin...</option>
+                                        @foreach (var stock in Model.StockList)
+                                        {
+                                            <option value="@stock.Id">@stock.Symbol - @stock.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>Durum</label>
+                                    <select name="StockTransaction.Status" class="form-control" required>
+                                        <option value="">Durum Seçin...</option>
+                                        <option value="Filled">Gerçekleşti</option>
+                                        <option value="Pending">Bekliyor</option>
+                                        <option value="Cancelled">İptal Edildi</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>İşlem Tipi</label>
+                                    <select name="StockTransaction.Type" class="form-control" required>
+                                        <option value="">İşlem Tipi Seçin...</option>
+                                        <option value="BUY">ALIŞ</option>
+                                        <option value="SOLD">SATIŞ</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>Miktar/Lot</label>
+                                    <input name="StockTransaction.Quantity" class="form-control" type="number" required />
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>Birim Fiyatı</label>
+                                    <input name="StockTransaction.Price" class="form-control input-money" required />
+                                </div>
+                            </div>
+                            <div class="card-footer text-right">
+                                <button type="submit" class="btn btn-primary">Kaydet</button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
+                            </div>
+                        </form>
+                    </div>
+                    <!-- Kripto Formu -->
+                    <div class="tab-pane fade" id="pills2" role="tabpanel">
+                        <form asp-action="Add" asp-controller="StockTransaction" method="post">
+                            <input name="StockTransaction.AssetType" type="hidden" value="CRYPTO" />
+                            <div class="form-row">
+                                <div class="form-group col-md-2">
+                                    <label>Yatırım Hesabım</label>
+                                    <select name="StockTransaction.StockAccountId" class="form-control" required>
+                                        <option value="">Hesap Seçin...</option>
+                                        @foreach (var account in Model.StockAccountList.Data)
+                                        {
+                                            <option value="@account.Id">@account.ExchangeName</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>Kripto Adı</label>
+
+                                    <select name="StockId" class="form-control" required>
+                                        <option value="">Kripto Seçin...</option>
+                                        @foreach (var stock in Model.CryptoList)
+                                        {
+                                            <option value="@stock.Id">@stock.Symbol - @stock.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>Durum</label>
+                                    <select name="StockTransaction.Status" class="form-control" required>
+                                        <option value="">Durum Seçin...</option>
+                                        <option value="Filled">Gerçekleşti</option>
+                                        <option value="Pending">Bekliyor</option>
+                                        <option value="Cancelled">İptal Edildi</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>İşlem Tipi</label>
+                                    <select name="StockTransaction.Type" class="form-control" required>
+                                        <option value="">İşlem Tipi Seçin...</option>
+                                        <option value="BUY">ALIŞ</option>
+                                        <option value="SOLD">SATIŞ</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>Miktar/Lot</label>
+                                    <input name="StockTransaction.Quantity" class="form-control" type="number" required />
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>Birim Fiyatı</label>
+                                    <input name="StockTransaction.Price" class="form-control input-money" required />
+                                </div>
+                            </div>
+                            <div class="card-footer text-right">
+                                <button type="submit" class="btn btn-primary">Kaydet</button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
+                            </div>
+                        </form>
+                    </div>
+                    <!-- Emtia Formu -->
+                    <div class="tab-pane fade" id="pills3" role="tabpanel">
+                        <form asp-action="Add" asp-controller="StockTransaction" method="post">
+                            <input name="StockTransaction.AssetType" type="hidden" value="EMTIA" />
+                            <div class="form-row">
+                                <div class="form-group col-md-2">
+                                    <label>Yatırım Hesabım</label>
+                                    <select name="StockTransaction.StockAccountId" class="form-control" required>
+                                        <option value="">Hesap Seçin...</option>
+                                        @foreach (var account in Model.StockAccountList.Data)
+                                        {
+                                            <option value="@account.Id">@account.ExchangeName</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>Varlık Adı</label>
+
+                                    <select name="StockId" class="form-control" required>
+                                        <option value="">Varlık Seçin...</option>
+                                        @foreach (var stock in Model.EmtiaList)
+                                        {
+                                            <option value="@stock.Id">@stock.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>Durum</label>
+                                    <select name="StockTransaction.Status" class="form-control" required>
+                                        <option value="">Durum Seçin...</option>
+                                        <option value="Filled">Gerçekleşti</option>
+                                        <option value="Pending">Bekliyor</option>
+                                        <option value="Cancelled">İptal Edildi</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>İşlem Tipi</label>
+                                    <select name="StockTransaction.Type" class="form-control" required>
+                                        <option value="">İşlem Tipi Seçin...</option>
+                                        <option value="BUY">ALIŞ</option>
+                                        <option value="SOLD">SATIŞ</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>Miktar/Adet</label>
+                                    <input name="StockTransaction.Quantity" class="form-control" type="number" required />
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>Birim Fiyatı</label>
+                                    <input name="StockTransaction.Price" class="form-control input-money" required />
+                                </div>
+                            </div>
+                            <div class="card-footer text-right">
+                                <button type="submit" class="btn btn-primary">Kaydet</button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Güncelleme Modalı -->
+<div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true" data-keyboard="false">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content card my-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <strong>İşlem Güncelle</strong>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="card-body">
+                <ul class="nav nav-pills mb-3" id="pills-tab2" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="pills-home-tab1" data-toggle="pill" href="#pills4" role="tab" aria-controls="pills4" aria-selected="true">
+                            <span class="fe fe-16 fe-activity"></span> Hisse Senedi/Fon
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="pills-profile-tab2" data-toggle="pill" href="#pills5" role="tab" aria-controls="pills5" aria-selected="false">
+                            <span class="fe fe-16 fe-activity"></span> Kripto
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="pills-contact-tab3" data-toggle="pill" href="#pills6" role="tab" aria-controls="pills6" aria-selected="false">
+                            <span class="fe fe-16 fe-activity"></span> Emtia
+                        </a>
+                    </li>
+                </ul>
+                <div class="tab-content" id="pills-tabContent2">
+                    <!-- Hisse Senedi/Fon Formu -->
+                    <div class="tab-pane fade show active" id="pills4" role="tabpanel">
+                        <form asp-action="Update" asp-controller="StockTransaction" method="post">
+                            <input name="StockTransaction.AssetType" type="hidden" value="STOCK" />
+                            <div class="form-row">
+                                <div class="form-group col-md-2">
+                                    <label>Yatırım Hesabım</label>
+                                    <select name="StockTransaction.StockAccountId" id="updateAccount" class="form-control" required>
+                                        <option value="">Hesap Seçin...</option>
+                                        @foreach (var account in Model.StockAccountList.Data)
+                                        {
+                                            <option value="@account.Id">@account.ExchangeName</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>Hisse/Fon Adı</label>
+
+                                    <select name="StockId" class="form-control" id="updateStock" required>
+                                        <option value="">Hisse/Fon Seçin...</option>
+                                        @foreach (var stock in Model.StockList)
+                                        {
+                                            <option value="@stock.Id">@stock.Symbol - @stock.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>Durum</label>
+                                    <select name="StockTransaction.Status" id="updateStatus" class="form-control" required>
+                                        <option value="">Durum Seçin...</option>
+                                        <option value="Filled">Gerçekleşti</option>
+                                        <option value="Pending">Bekliyor</option>
+                                        <option value="Cancelled">İptal Edildi</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>İşlem Tipi</label>
+                                    <select name="StockTransaction.Type" id="updateType" class="form-control" required>
+                                        <option value="">İşlem Tipi Seçin...</option>
+                                        <option value="BUY">ALIŞ</option>
+                                        <option value="SOLD">SATIŞ</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>Miktar/Lot</label>
+                                    <input name="StockTransaction.Quantity" id="updateQuantity" class="form-control" type="number" required />
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>Birim Fiyatı</label>
+                                    <input name="StockTransaction.Price" id="updatePrice" class="form-control input-money" required />
+                                </div>
+                            </div>
+                            <div class="card-footer text-right">
+                                <button type="submit" class="btn btn-primary">Kaydet</button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
+                            </div>
+                        </form>
+                    </div>
+                    <!-- Kripto Formu -->
+                    <div class="tab-pane fade" id="pills2" role="tabpanel">
+                        <form asp-action="Update" asp-controller="StockTransaction" method="post">
+                            <input name="StockTransaction.AssetType" type="hidden" value="STOCK" />
+                            <div class="form-row">
+                                <div class="form-group col-md-2">
+                                    <label>Yatırım Hesabım</label>
+                                    <select name="StockTransaction.StockAccountId" id="updateAccount" class="form-control" required>
+                                        <option value="">Hesap Seçin...</option>
+                                        @foreach (var account in Model.StockAccountList.Data)
+                                        {
+                                            <option value="@account.Id">@account.ExchangeName</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>Kripto Adı</label>
+
+                                    <select name="StockId" class="form-control" id="updateStock" required>
+                                        <option value="">Kripto Seçin...</option>
+                                        @foreach (var stock in Model.CryptoList)
+                                        {
+                                            <option value="@stock.Id">@stock.Symbol - @stock.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>Durum</label>
+                                    <select name="StockTransaction.Status" id="updateStatus" class="form-control" required>
+                                        <option value="">Durum Seçin...</option>
+                                        <option value="Filled">Gerçekleşti</option>
+                                        <option value="Pending">Bekliyor</option>
+                                        <option value="Cancelled">İptal Edildi</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>İşlem Tipi</label>
+                                    <select name="StockTransaction.Type" id="updateType" class="form-control" required>
+                                        <option value="">İşlem Tipi Seçin...</option>
+                                        <option value="BUY">ALIŞ</option>
+                                        <option value="SOLD">SATIŞ</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>Miktar/Adet</label>
+                                    <input name="StockTransaction.Quantity" id="updateQuantity" class="form-control" type="number" required />
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>Birim Fiyatı</label>
+                                    <input name="StockTransaction.Price" id="updatePrice" class="form-control input-money" required />
+                                </div>
+                            </div>
+                            <div class="card-footer text-right">
+                                <button type="submit" class="btn btn-primary">Kaydet</button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
+                            </div>
+                        </form>
+                    </div>
+                    <!-- Emtia Formu -->
+                    <div class="tab-pane fade" id="pills6" role="tabpanel">
+                        <form asp-action="Update" asp-controller="StockTransaction" method="post">
+                            <input name="StockTransaction.AssetType" type="hidden" value="STOCK" />
+                            <div class="form-row">
+                                <div class="form-group col-md-2">
+                                    <label>Yatırım Hesabım</label>
+                                    <select name="StockTransaction.StockAccountId" id="updateAccount" class="form-control" required>
+                                        <option value="">Hesap Seçin...</option>
+                                        @foreach (var account in Model.StockAccountList.Data)
+                                        {
+                                            <option value="@account.Id">@account.ExchangeName</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>Varlık Adı</label>
+
+                                    <select name="StockId" class="form-control" id="updateStock" required>
+                                        <option value="">Varlık Seçin...</option>
+                                        @foreach (var stock in Model.EmtiaList)
+                                        {
+                                            <option value="@stock.Id">@stock.Symbol - @stock.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>Durum</label>
+                                    <select name="StockTransaction.Status" id="updateStatus" class="form-control" required>
+                                        <option value="">Durum Seçin...</option>
+                                        <option value="Filled">Gerçekleşti</option>
+                                        <option value="Pending">Bekliyor</option>
+                                        <option value="Cancelled">İptal Edildi</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>İşlem Tipi</label>
+                                    <select name="StockTransaction.Type" id="updateType" class="form-control" required>
+                                        <option value="">İşlem Tipi Seçin...</option>
+                                        <option value="BUY">ALIŞ</option>
+                                        <option value="SOLD">SATIŞ</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>Miktar/Adet</label>
+                                    <input name="StockTransaction.Quantity" id="updateQuantity" class="form-control" type="number" required />
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>Birim Fiyatı</label>
+                                    <input name="StockTransaction.Price" id="updatePrice" class="form-control input-money" required />
+                                </div>
+                            </div>
+                            <div class="card-footer text-right">
+                                <button type="submit" class="btn btn-primary">Kaydet</button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Silme Modalı -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteLabel">İşlem Sil</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">Sistemde kayıtlı işleminizi silmek üzeresiniz. Silmek istediğinizden emin misiniz?</div>
+            <form method="post" asp-controller="StockTransaction" asp-action="Delete">
+                <input type="hidden" id="deleteId" name="id" value="" />
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-danger">Sil</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    // Silme modalına id gönder
+    $(document).ready(function () {
+        $('#deleteModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var id = button.data('id');
+            var modal = $(this);
+            modal.find('#deleteId').val(id);
+        });
+    });
+
+    var transactions = @Html.Raw(Json.Serialize(Model.StockTransactionList.Data));
+    var stockList = @Html.Raw(Json.Serialize(Model.StockList));
+    $(document).on('click', '[data-target="#updateModal"]', function () {
+        var button = $(this);
+        var transactionId = button.data('id');
+
+        var selected = transactions.find(t => t.id === transactionId);
+        if (!selected) {
+            console.error("İşlem bulunamadı:", transactionId);
+            return;
+        }
+        var matchedStock = stockList.find(s => s.symbol === selected.stockSymbol);
+        if (!matchedStock) {
+            console.warn("Eşleşen stok bulunamadı:", selected.stockSymbol);
+            return;
+        }
+        $('#updateId').val(selected.id);
+        $('#updateQuantity').val(selected.quantity);
+        $('#updateType').val(selected.type);
+        $('#updateStatus').val(selected.status);
+        $('#updatePrice').val(selected.price);
+        $('#updateStock').val(matchedStock.id);
+        $('#updateAccount').val(selected.stockAccountId);
+    });
+
+</script>

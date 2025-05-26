@@ -1,0 +1,220 @@
+﻿@model AssetViewModel
+<link rel="stylesheet" href="~/css/dataTables.bootstrap4.css">
+<style>
+    .asset-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        padding: 1rem;
+    }
+
+    .asset-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .asset-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    .asset-header {
+        padding: 1.5rem;
+        background: linear-gradient(45deg, #f8f9fa, #ffffff);
+        border-bottom: 1px solid #eee;
+    }
+
+    .asset-symbol {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .asset-name {
+        color: #6c757d;
+        font-size: 1rem;
+    }
+
+    .asset-body {
+        padding: 1.5rem;
+    }
+
+    .asset-stat {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f8f9fa;
+    }
+
+    .asset-stat:last-child {
+        border-bottom: none;
+    }
+
+    .stat-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .stat-value {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .profit {
+        color: #3ad29f;
+        font-weight: 700;
+    }
+
+    .loss {
+        color: #dc3545;
+        font-weight: 700;
+    }
+
+    .asset-footer {
+        padding: 1rem 1.5rem;
+        background: #f8f9fa;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .total-amount {
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .page-header {
+        padding: 2rem 1rem;
+        background: linear-gradient(45deg, #f8f9fa, #ffffff);
+        margin-bottom: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+    .page-title {
+        color: #2c3e50;
+        font-weight: 700;
+        margin: 0;
+        font-size: 2rem;
+    }
+
+    .search-container {
+        margin-bottom: 2rem;
+        padding: 0 1rem;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 1rem;
+        border: 2px solid #eee;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+        border-color: #3ad29f;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(58, 210, 159, 0.1);
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="page-header">
+        <h1 class="page-title">Varlıklarım</h1>
+    </div>
+
+    <div class="search-container">
+        <input type="text" class="search-input" placeholder="Varlık ara..." id="assetSearch">
+    </div>
+
+    <div class="asset-grid">
+        @foreach (var asset in Model.MyAssets.Data)
+        {
+            var karZararClass = asset.KarZarar > 0 ? "profit" : asset.KarZarar < 0 ? "loss" : "";
+            <div class="asset-card">
+                <div class="asset-header">
+                    <div class="asset-symbol">@asset.Sembol</div>
+                    <div class="asset-name">@asset.Ad</div>
+                </div>
+                <div class="asset-body">
+                    <div class="asset-stat">
+                        <span class="stat-label">Alınan Miktar</span>
+                        <span class="stat-value">@asset.AlinanAdet</span>
+                    </div>
+                    <div class="asset-stat">
+                        <span class="stat-label">Alış Hacmi</span>
+                        <span class="stat-value">@asset.AlisToplam.ToString("N2") TL</span>
+                    </div>
+                    <div class="asset-stat">
+                        <span class="stat-label">Satılan Miktar</span>
+                        <span class="stat-value">@asset.SatilanAdet</span>
+                    </div>
+                    <div class="asset-stat">
+                        <span class="stat-label">Satış Hacmi</span>
+                        <span class="stat-value">@asset.SatisToplam.ToString("N2") TL</span>
+                    </div>
+                    <div class="asset-stat">
+                        <span class="stat-label">Kalan Miktar</span>
+                        <span class="stat-value">@asset.KalanAdet</span>
+                    </div>
+                    <div class="asset-stat">
+                        <span class="stat-label">Ortalama Maliyet</span>
+                        <span class="stat-value">@asset.OrtalamaAlis.ToString("N2") TL</span>
+                    </div>
+                </div>
+                <div class="asset-footer">
+                    <div class="total-amount @karZararClass">
+                        @asset.KarZarar.ToString("N2") TL
+                        <small>(%@asset.KarZararYuzdesi)</small>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    document.getElementById('assetSearch').addEventListener('keyup', function() {
+        const searchText = this.value.toLowerCase();
+        const cards = document.querySelectorAll('.asset-card');
+        
+        cards.forEach(card => {
+            const symbol = card.querySelector('.asset-symbol').textContent.toLowerCase();
+            const name = card.querySelector('.asset-name').textContent.toLowerCase();
+            
+            if (symbol.includes(searchText) || name.includes(searchText)) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

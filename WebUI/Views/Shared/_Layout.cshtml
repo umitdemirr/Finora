@@ -101,6 +101,24 @@
                         </a>
                     </li>
                 </ul>
+                <ul class="navbar-nav flex-fill w-100 mb-2">
+                    <li class="nav-item w-100">
+                        <a class="nav-link" href="@Url.Action("BudgetAnalysis","FinorAI")">
+                            <i class="fe fe-compass fe-16"></i>
+                            <span class="ml-3 item-text">Bütçe Analizi</span>
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav flex-fill w-100 mb-2">
+                    <li class="nav-item w-100">
+                        <a class="nav-link" href="@Url.Action("InvestAnalysis","FinorAI")">
+                            <i class="fe fe-compass fe-16"></i>
+                            <span class="ml-3 item-text">Yatırım Analizi</span>
+                        </a>
+                    </li>
+                </ul>
+                
+                
                 <!--  ANA SAYFA BİTİŞ -->
 
 
@@ -159,6 +177,8 @@
 
                 </ul>
                 <!-- BÜTÇE YÖNETİMİ BİTİŞ -->
+
+
                 <!-- YATIRIM YÖNETİMİ BAŞLANGIÇ -->
                 <p class="text-muted nav-heading mt-4 mb-1">
                     <span>Yatırım  Yönetimi</span>
@@ -167,7 +187,7 @@
                     <ul class="navbar-nav flex-fill w-100 mb-2">
                         <!-- Banka Hesapları -->
                         <li class="nav-item w-100">
-                            <a class="nav-link" href="@Url.Action("Index","BankAccount")">
+                            <a class="nav-link" href="@Url.Action("StockAccount","StockAccount")">
                                 <i class="fe fe-bookmark fe-16"></i>
                                 <span class="ml-3 item-text">Borsa Hesaplarım</span>
                             </a>
@@ -175,22 +195,22 @@
 
                         <!-- Banka Hesapları -->
                         <li class="nav-item w-100">
-                            <a class="nav-link" href="@Url.Action("Index","BankAccount")">
+                            <a class="nav-link" href="@Url.Action("Index","Asset")">
                                 <i class="fe fe-database fe-16" style="color:gold"></i>
                                 <span class="ml-3 item-text">Varlıklarım</span>
                             </a>
                         </li>
 
-                        <!-- Banka Hesapları -->
+@*                         <!-- Banka Hesapları -->
                         <li class="nav-item w-100">
-                            <a class="nav-link" href="@Url.Action("Index","BankAccount")">
+                            <a class="nav-link" href="@Url.Action("Index","Portfolio")">
                                 <i class="fe fe-activity fe-16" style="color:orangered"></i>
                                 <span class="ml-3 item-text">Portföylerim</span>
                             </a>
-                        </li>
+                        </li> *@
                         <!-- Banka Hesapları -->
                         <li class="nav-item w-100">
-                            <a class="nav-link" href="@Url.Action("Index","BankAccount")">
+                            <a class="nav-link" href="@Url.Action("Index","StockTransaction")">
                                 <i class="fe fe-flag fe-16" style="color:lawngreen"></i>
                                 <span class="ml-3 item-text">Emirler</span>
                             </a>
@@ -200,31 +220,6 @@
 
                 </ul>
                 <!-- YATIRIM YÖNETİMİ BİTİŞ -->
-                <!-- RAPOR BAŞLANGIÇ -->
-                <p class="text-muted nav-heading mt-4 mb-1">
-                    <span>Raporlar & Analizler</span>
-                </p>
-                <ul class="navbar-nav flex-fill w-100 mb-2">
-                    <ul class="navbar-nav flex-fill w-100 mb-2">
-                        <li class="nav-item w-100">
-                            <a class="nav-link" href="">
-                                <i class="fe fe-layers fe-16"></i>
-                                <span class="ml-3 item-text">Gelir-Gider Raporları</span>
-                                <span class="badge badge-pill badge-primary">1</span>
-                            </a>
-                        </li>
-                        <li class="nav-item w-100">
-                            <a class="nav-link" href="">
-                                <i class="fe fe-layers fe-16"></i>
-                                <span class="ml-3 item-text">Bütçe Yatırım Analizleri</span>
-                                <span class="badge badge-pill badge-primary">3</span>
-                            </a>
-                        </li>
-
-                    </ul>
-
-                </ul>
-                <!-- RAPOR YÖNETİMİ BİTİŞ -->
             </nav>
             <!-- SIDEBAR İÇERİK BİTİŞ -->
 

@@ -1,6 +1,5 @@
 ﻿using Business.Abstract;
 using Entities.Concrete;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers;
@@ -26,6 +25,28 @@ public class PortfolioController : ControllerBase
         }
         return BadRequest(result);
     }
+    [HttpGet("getdetail")]
+    public IActionResult GetDetails()
+    {
+        var result = _portfolioService.GetAllPortfolioDetail();
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+        return BadRequest(result);
+    }
+
+    [HttpGet("getdetailbyuserid")]
+    public IActionResult GetDetailsByUserId(int userId)
+    {
+        var result = _portfolioService.GetAllPortfolioDetailByUserId(userId);
+        if (result.Success)
+        {
+            return Ok(result);
+        }
+        return BadRequest(result);
+    }
+
 
     [HttpPost("add")]
     public IActionResult Add(Portfolio portfolio)

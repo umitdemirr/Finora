@@ -37,17 +37,29 @@ api.interceptors.response.use(
     return response;
   },
   async (error) => {
+    
     if (error.code === 'ECONNABORTED') {
       // Timeout hatası
       return Promise.reject({
-        message: 'İstek zaman aşımına uğradı. Lütfen daha sonra tekrar deneyin.'
+        message: 'İstek zaman aşımına uğradı. Lütfen daha sonra tekrar deneyin.',
+        code: 'TIMEOUT'
       });
     }
 
     if (!error.response) {
       // Network hatası
       return Promise.reject({
-        message: 'Sunucuya bağlanılamadı. Lütfen internet bağlantınızı kontrol edin ve tekrar deneyin.'
+        message: 'Sunucuya bağlanılamadı. Backend server çalışmıyor olabilir. DevTunnel URL\'ini kontrol edin.',
+        code: 'NETWORK_ERROR',
+        details: 'DevTunnel URL expired or backend server is down'
+      });
+    }
+
+    if (error.response && error.response.status === 404) {
+      return Promise.reject({
+        message: 'API endpoint bulunamadı. Backend server adresi değişmiş olabilir.',
+        code: 'API_NOT_FOUND',
+        status: 404
       });
     }
 

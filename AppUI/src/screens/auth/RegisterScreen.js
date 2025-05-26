@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import api from '../../services/api';
+import { RegisterStyles as styles, colors } from '../../styles/RegisterStyles';
 
 const RegisterScreen = ({ navigation }) => {
   
@@ -94,37 +95,53 @@ const RegisterScreen = ({ navigation }) => {
       style={styles.container}
     >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.formContainer}>
+        <View style={styles.header}>
           <Text style={styles.title}>Kayıt Ol</Text>
+          <Text style={styles.subtitle}>Yeni hesabınızı oluşturun</Text>
+        </View>
+
+        <View style={styles.formContainer}>
           <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder="Ad"
-              value={firstName}
-              onChangeText={setFirstName}
-            />
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={styles.passwordInput}
+                placeholder="Ad"
+                value={firstName}
+                onChangeText={setFirstName}
+                placeholderTextColor={colors.text.placeholder}
+              />
+            </View>
             {errors.firstName && <Text style={styles.errorText}>{errors.firstName}</Text>}
           </View>
+
           <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder="Soyad"
-              value={lastName}
-              onChangeText={setLastName}
-            />
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={styles.passwordInput}
+                placeholder="Soyad"
+                value={lastName}
+                onChangeText={setLastName}
+                placeholderTextColor={colors.text.placeholder}
+              />
+            </View>
             {errors.lastName && <Text style={styles.errorText}>{errors.lastName}</Text>}
           </View>
+
           <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder="Email"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              value={email}
-              onChangeText={setEmail}
-            />
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={styles.passwordInput}
+                placeholder="Email"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                value={email}
+                onChangeText={setEmail}
+                placeholderTextColor={colors.text.placeholder}
+              />
+            </View>
             {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
           </View>
+
           <View style={styles.inputContainer}>
             <View style={styles.passwordContainer}>
               <TextInput
@@ -133,6 +150,7 @@ const RegisterScreen = ({ navigation }) => {
                 secureTextEntry={!showPassword}
                 value={password}
                 onChangeText={setPassword}
+                placeholderTextColor={colors.text.placeholder}
               />
               <TouchableOpacity
                 style={styles.eyeIcon}
@@ -141,12 +159,13 @@ const RegisterScreen = ({ navigation }) => {
                 <Ionicons
                   name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                   size={24}
-                  color="#666"
+                  color={colors.text.secondary}
                 />
               </TouchableOpacity>
             </View>
             {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
           </View>
+
           <View style={styles.inputContainer}>
             <View style={styles.passwordContainer}>
               <TextInput
@@ -155,6 +174,7 @@ const RegisterScreen = ({ navigation }) => {
                 secureTextEntry={!showConfirmPassword}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
+                placeholderTextColor={colors.text.placeholder}
               />
               <TouchableOpacity
                 style={styles.eyeIcon}
@@ -163,7 +183,7 @@ const RegisterScreen = ({ navigation }) => {
                 <Ionicons
                   name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
                   size={24}
-                  color="#666"
+                  color={colors.text.secondary}
                 />
               </TouchableOpacity>
             </View>
@@ -171,91 +191,24 @@ const RegisterScreen = ({ navigation }) => {
               <Text style={styles.errorText}>{errors.confirmPassword}</Text>
             )}
           </View>
+
           <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
             <Text style={styles.registerButtonText}>Kayıt Ol</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.loginLink} onPress={() => navigation.navigate('Login')}>
-            <Text style={styles.loginLinkText}>
-              Zaten hesabınız var mı? Giriş yapın
-            </Text>
-          </TouchableOpacity>
+
+          <View style={styles.loginContainer}>
+            <Text style={styles.loginText}>Zaten hesabınız var mı?</Text>
+            <TouchableOpacity 
+              style={styles.loginLink} 
+              onPress={() => navigation.navigate('Login')}
+            >
+              <Text style={styles.loginLinkText}>Giriş Yapın</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: 'center',
-  },
-  formContainer: {
-    padding: 20,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 30,
-    textAlign: 'center',
-  },
-  inputContainer: {
-    marginBottom: 20,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 15,
-    fontSize: 16,
-    backgroundColor: '#f8f8f8',
-  },
-  passwordContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    backgroundColor: '#f8f8f8',
-  },
-  passwordInput: {
-    flex: 1,
-    padding: 15,
-    fontSize: 16,
-  },
-  eyeIcon: {
-    padding: 10,
-  },
-  errorText: {
-    color: '#ff3333',
-    fontSize: 14,
-    marginTop: 5,
-  },
-  registerButton: {
-    backgroundColor: '#007AFF',
-    padding: 15,
-    borderRadius: 8,
-    marginTop: 10,
-  },
-  registerButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  loginLink: {
-    marginTop: 20,
-  },
-  loginLinkText: {
-    color: '#007AFF',
-    fontSize: 16,
-    textAlign: 'center',
-  },
-});
 
 export default RegisterScreen; 

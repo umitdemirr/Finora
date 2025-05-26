@@ -13,15 +13,15 @@ public class EfCreditCardDal : EfEntityRepositoryBase<CreditCard, PostgreDbConte
         {
             var result = from card in context.CreditCards
                          join user in context.Users on card.UserId equals user.Id
-                         join account in context.BankAccounts on card.BankId equals account.Id
+                         join bank in context.BanksAndExchanges on card.BankId equals bank.Id
                          where card.UserId == userId
                          select new CreditCardDetailDto
                          {
                              Id = card.Id,
                              UserId = user.Id,
                              UserName = user.FirstName + " " + user.LastName,
-                             BankId = account.BankId,
-                             BankName = account.Name,
+                             BankId = bank.Id,
+                             BankName = bank.Name,
                              Name = card.Name,
                              Provider = card.Provider,
                              CardNumber = card.Number,
@@ -29,6 +29,7 @@ public class EfCreditCardDal : EfEntityRepositoryBase<CreditCard, PostgreDbConte
                              CVV = card.CVV,
                              Limit = card.Limit,
                              AvaliableLimit = card.AvaliableLimit,
+                             StatementClosingDate = card.StatementClosingDate,
                              IsActive = card.IsActive,
                          };
             return result.ToList();

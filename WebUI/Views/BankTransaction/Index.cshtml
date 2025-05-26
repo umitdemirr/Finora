@@ -118,7 +118,7 @@
                             <div>
                                 <h6 class="text-muted mb-1">Toplam Gelir</h6>
                                 <div class="summary-amount text-success">
-                                    @Model.BankTransactionList.Data.Where(x => x.TransactionType == "Gelir").Sum(x => x.Amount) TL
+                                    @Model.BankTransactionList.Data.Where(x => x.TransactionType == "Gelir").Sum(x => x.Amount).ToString("N2") TL
                                 </div>
                             </div>
                             <div class="transaction-type-icon income">
@@ -133,7 +133,7 @@
                             <div>
                                 <h6 class="text-muted mb-1">Toplam Gider</h6>
                                 <div class="summary-amount text-danger">
-                                    @Model.BankTransactionList.Data.Where(x => x.TransactionType == "Gider").Sum(x => x.Amount) TL
+                                    @Model.BankTransactionList.Data.Where(x => x.TransactionType == "Gider").Sum(x => x.Amount).ToString("N2") TL
                                 </div>
                             </div>
                             <div class="transaction-type-icon expense">

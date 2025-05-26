@@ -20,7 +20,7 @@ namespace WebUI.Controllers
         {
             var model = new BankTransactionViewModel();
 
-            model.BankTransactionList = _businessService.GetAll<BankTransaction>(ApiURL.BankTransactionGetAll).Result;
+            model.BankTransactionList = _businessService.GetByUserId<BankTransaction>(ApiURL.BankTransactionGetDetail).Result;
             model.BankAccountList = await _businessService.GetFiltered<BankAccount>(ApiURL.BankAccountGetAll, u=>u.UserId == _tokenService.GetTokenInfo());
             model.BankList = await _businessService.GetAll<BankAndExchange>(ApiURL.BankAndExchangeGetAll);
             model.BankCardList = await _businessService.GetAll<Card>(ApiURL.BankCardGetAll);
@@ -46,6 +46,7 @@ namespace WebUI.Controllers
         {
             model.BankTransaction.Date = DateTime.UtcNow;
             model.BankTransaction.Currency = "TRY";
+            model.BankTransaction.UserId = _tokenService.GetTokenInfo();
             await _businessService.PostAsync(model.BankTransaction, ApiURL.BankTransactionAdd);
             return RedirectToAction("Index");
         }

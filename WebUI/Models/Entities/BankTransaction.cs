@@ -5,6 +5,7 @@ public class BankTransaction : IEntity
 {
     public int Id { get; set; }
     public int AccountId { get; set; }
+    public int UserId { get; set; }
     public string? Category { get; set; }
     public string? TransactionType { get; set; }
     public string? PaymentType { get; set; }

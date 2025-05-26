@@ -1,0 +1,8 @@
+﻿@model PortfolioViewModel
+
+@foreach (var portfolio in Model.PortfolioDetails.Data)
+{
+    <h6>Ortalama Fiyat: @portfolio.AveragePrice</h6>
+    <h6>Sembol: @portfolio.StockSymbol</h6>
+    <h6>Adet: @portfolio.Quantity</h6>
+}

@@ -27,7 +27,7 @@ public class BankTransactionManager : IBankTransactionService
         if (bankTransaction.PaymentType == Constant.PaymentTypeCreditCard)
         {
             var creditCard = _creditCardService.GetAll().Data.Where(cc => cc.Id == bankTransaction.AccountId).FirstOrDefault();
-
+            bankTransaction.TransactionType = Constant.Debit;
             if (bankTransaction.Amount <= creditCard.AvaliableLimit)
             {
                 creditCard.AvaliableLimit = creditCard.AvaliableLimit - bankTransaction.Amount;
@@ -44,9 +44,12 @@ public class BankTransactionManager : IBankTransactionService
         {
             var bankCard = _bankCardService.GetAll().Data.Where(bc => bc.Id == bankTransaction.AccountId).FirstOrDefault();
             var account = _bankAccountService.GetAll().Data.Where(a => a.Id == bankCard.AccountId).FirstOrDefault();
+            bankTransaction.TransactionType = Constant.Expense;
             if (account?.Balance >= bankTransaction.Amount)
             {
                 account.Balance = account.Balance - bankTransaction.Amount;
+                account.UpdatedAt = DateTime.UtcNow;
+                account.CreatedAt = DateTime.UtcNow;
                 _bankAccountService.Update(account);
             }
             else

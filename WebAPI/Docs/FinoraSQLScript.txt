@@ -104,6 +104,22 @@ CREATE TABLE "StockTransaction" (
     "Date" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE "CreditCards" (
+    "Id" SERIAL PRIMARY KEY,
+    "UserId" INT NOT NULL REFERENCES "Users"("Id"),
+    "BankId" INT NOT NULL REFERENCES "BanksAndExchanges"("Id"),
+	"Name" VARCHAR(50) NOT NULL,
+    "Provider" VARCHAR(50) NOT NULL,
+    "CardNumber" VARCHAR(20) UNIQUE NOT NULL,
+    "ExpiryDate" VARCHAR(10) NOT NULL,
+    "CVV" VARCHAR(5) NOT NULL,
+	"Limit" MONEY NOT NULL,
+	"AvaliableLimit" MONEY NOT NULL,
+    "IsActive" BOOLEAN NOT NULL,
+    "CreatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "UpdatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 
 -- "User" tablosuna veri ekleme
 INSERT INTO "Users" ("FirstName", "LastName", "Mail", "PasswordHash", "PasswordSalt", "Status") VALUES

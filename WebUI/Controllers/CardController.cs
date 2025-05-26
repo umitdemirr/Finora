@@ -50,18 +50,38 @@ public class CardController : Controller
 
     public async Task<IActionResult> Update(BankCardViewModel model)
     {
-        var card = _businessService.GetAll<Card>(ApiURL.BankCardGetAll).Result.Data?.Where(d => d.Id == model.Card?.Id).FirstOrDefault();
+        if (model.Card.Type == "creditcard")
+        {
+            var card = _businessService.GetAll<Card>(ApiURL.CreditCardGetAll).Result.Data?.Where(d => d.Id == model.Card?.Id).FirstOrDefault();
 
-        card.AvaliableLimit = model.Card.AvaliableLimit;
-        card.AccountId = model.Card.AccountId;
-        card.Number = model.Card.Number;
-        card.Provider = model.Card.Provider;
-        card.ExpiryDate = model.Card.ExpiryDate;
-        card.CVV = model.Card.CVV;
-        card.Limit = model.Card.Limit;
-        card.AvaliableLimit = model.Card.AvaliableLimit;
-        card.CreatedAt = DateTime.UtcNow;
-        await _businessService.PostAsync(card, ApiURL.BankCardUpdate);
+            card.BankId = model.Card.BankId;
+            card.AvaliableLimit = model.Card.AvaliableLimit;
+            card.Name = model.Card.Name;
+            card.Provider = model.Card.Provider;
+            card.Number = model.Card.Number;
+            card.ExpiryDate = model.Card.ExpiryDate;
+            card.CVV = model.Card.CVV;
+            card.Limit = model.Card.Limit;
+            card.AvaliableLimit = model.Card.AvaliableLimit;
+
+            card.CreatedAt = DateTime.UtcNow;
+            await _businessService.PostAsync(card, ApiURL.CreditCardUpdate);
+        }
+        else if (model.Card.Type == "bankcard")
+        {
+            var card = _businessService.GetAll<Card>(ApiURL.BankCardGetAll).Result.Data?.Where(d => d.Id == model.Card?.Id).FirstOrDefault();
+            
+            card.AvaliableLimit = model.Card.AvaliableLimit;
+            card.AccountId = model.Card.AccountId;
+            card.Number = model.Card.Number;
+            card.Provider = model.Card.Provider;
+            card.ExpiryDate = model.Card.ExpiryDate;
+            card.CVV = model.Card.CVV;
+            card.Limit = model.Card.Limit;
+            card.AvaliableLimit = model.Card.AvaliableLimit;
+            card.CreatedAt = DateTime.UtcNow;
+            await _businessService.PostAsync(card, ApiURL.BankCardUpdate);
+        }
 
         return RedirectToAction("Index");
     }

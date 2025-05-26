@@ -3,6 +3,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { View, Text, StyleSheet } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 // Auth Screens
 import LoginScreen from '../screens/auth/LoginScreen';
@@ -15,35 +17,71 @@ import AddAccountScreen from '../screens/budget/AddAccountScreen';
 import CardsScreen from '../screens/budget/CardsScreen';
 import AddCardScreen from '../screens/budget/AddCardScreen';
 import AddCreditCardScreen from '../screens/budget/AddCreditCardScreen';
-import BudgetHomeScreen from '../screens/budget/BudgetHomeScreen';
+import HomeScreen from '../screens/budget/HomeScreen';
+import BudgetAnalysisScreen from '../screens/budget/BudgetAnalysisScreen';
 
+// AI Screen
+import AiChatScreen from '../screens/ai/AiChatScreen';
 
-
-// Investment Screens
-import AssetDetailScreen from '../screens/investment/AssetDetailScreen';
-import TradeScreen from '../screens/investment/TradeScreen';
-import AnalysisScreen from '../screens/investment/AnalysisScreen';
-import PortfolioScreen from '../screens/investment/PortfolioScreen';
+// Portfolio Screen
+import PortfolioScreen from '../screens/portfolio/PortfolioScreen';
+import StockAccountsScreen from '../screens/portfolio/StockAccountsScreen';
+import StockTransactionsScreen from '../screens/portfolio/StockTransactionsScreen';
+import AddStockTransactionScreen from '../screens/portfolio/AddStockTransactionScreen';
+import PortfolioAiAnalysisScreen from '../screens/portfolio/PortfolioAiAnalysisScreen';
 
 // Bottom Tab Navigator Screeens
-import HomeScreen from '../screens/HomeScreen';
 import TransactionsScreen from '../screens/transactions/RecentTransactionsScreen';
-import ProfileScreen from '../screens/ProfileScreen';
+import PersonalInfoScreen from '../screens/setting/PersonalInfoScreen';
+import SettingsScreen from '../screens/setting/SettingsScreen';
 
+// About Screens
+import PrivacyPolicyScreen from '../screens/about/PrivacyPolicyScreen';
+import TermsScreen from '../screens/about/TermsScreen';
+import AboutScreen from '../screens/about/AboutScreen';
 
 // Import screens
-import BillsScreen from '../screens/BillsScreen';
-
+import CreditCardDetailScreen from '../screens/cards/CreditCardDetailScreen';
 
 // Create navigators
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
+
+const HeaderTitle = () => (
+  <View style={styles.headerContainer}>
+    <Icon name="wallet" size={28} color="#FFF" style={styles.headerIcon} />
+    <Text style={styles.headerTitle}>Finora</Text>
+  </View>
+);
+
+const styles = StyleSheet.create({
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerIcon: {
+    marginRight: 8,
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#FFF',
+    letterSpacing: 1,
+  },
+  headerGradient: {
+    height: 60,
+    width: '100%',
+    justifyContent: 'center',
+  },
+});
 
 // Bottom Tab Navigator
 const TabNavigator = () => {
   return (
     <Tab.Navigator
       screenOptions={{
+        headerShown: true,
         tabBarActiveTintColor: '#2196F3',
         tabBarInactiveTintColor: '#666',
         tabBarStyle: {
@@ -54,17 +92,20 @@ const TabNavigator = () => {
           paddingTop: 5,
           height: 60,
         },
-        headerStyle: {
-          backgroundColor: '#2196F3',
-        },
-        headerTintColor: '#FFF',
-        headerTitleStyle: {
-          fontWeight: 'bold',
-        },
+        header: () => (
+          <LinearGradient
+            colors={['#2196F3', '#1976D2']}
+            style={styles.headerGradient}
+          >
+            <HeaderTitle />
+          </LinearGradient>
+        ),
+        headerTitleAlign: 'center',
+        headerLeft: () => null,
       }}
     >
       <Tab.Screen
-        name="Home"
+        name="BudgetHome"
         component={HomeScreen}
         options={{
           title: 'Ana Sayfa',
@@ -74,22 +115,22 @@ const TabNavigator = () => {
         }}
       />
       <Tab.Screen
-        name="BudgetHome"
-        component={BudgetHomeScreen}
+        name="Accounts"
+        component={AccountsScreen}
         options={{
-          title: 'Bütçe Yönetimi',
+          title: 'Hesaplarım',
           tabBarIcon: ({ color, size }) => (
-            <Icon name="home" size={size} color={color} />
+            <Icon name="bank" size={size} color={color} />
           ),
         }}
       />
       <Tab.Screen
-        name="Transactions"
-        component={TransactionsScreen}
+        name="Cards"
+        component={CardsScreen}
         options={{
-          title: 'Son İşlemler',
+          title: 'Kartlar',
           tabBarIcon: ({ color, size }) => (
-            <Icon name="piggy-bank" size={size} color={color} />
+            <Icon name="credit-card" size={size} color={color} />
           ),
         }}
       />
@@ -103,14 +144,23 @@ const TabNavigator = () => {
           ),
         }}
       />
-
       <Tab.Screen
-        name="Profile"
-        component={ProfileScreen}
+        name="AiChat"
+        component={AiChatScreen}
         options={{
-          title: 'Profil',
+          title: 'AI Asistan',
           tabBarIcon: ({ color, size }) => (
-            <Icon name="chart-line" size={size} color={color} />
+            <Icon name="robot" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{
+          title: 'Ayarlar',
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="cog" size={size} color={color} />
           ),
         }}
       />
@@ -123,13 +173,17 @@ const AppNavigator = () => {
     <NavigationContainer>
       <Stack.Navigator
         screenOptions={{
-          headerStyle: {
-            backgroundColor: '#2196F3',
-          },
-          headerTintColor: '#FFF',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
+          headerShown: true,
+          header: () => (
+            <LinearGradient
+              colors={['#2196F3', '#1976D2']}
+              style={styles.headerGradient}
+            >
+              <HeaderTitle />
+            </LinearGradient>
+          ),
+          headerTitleAlign: 'center',
+          headerLeft: () => null,
         }}
       >
         <Stack.Screen
@@ -153,6 +207,11 @@ const AppNavigator = () => {
           options={{ title: 'Hesaplarım' }}
         />
         <Stack.Screen
+          name="Transactions"
+          component={TransactionsScreen}
+          options={{ title: 'Son İşlemler' }}
+        />
+        <Stack.Screen
           name="AccountDetail"
           component={AccountDetailScreen}
           options={{ title: 'Hesap Detayı' }}
@@ -173,9 +232,14 @@ const AppNavigator = () => {
           options={{ title: 'Kredi Kartı Ekle' }}
         />
         <Stack.Screen
-          name="Profile"
-          component={ProfileScreen}
-          options={{ title: 'Profil' }}
+          name="CardDetail"
+          component={CreditCardDetailScreen}
+          options={{ title: 'Kredi Kartı Detayı' }}
+        />
+        <Stack.Screen
+          name="PersonalInfo"
+          component={PersonalInfoScreen}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="AddAccount"
@@ -183,46 +247,53 @@ const AppNavigator = () => {
           options={{ title: 'Yeni Hesap Ekle' }}
         />
         <Stack.Screen
-          name="AssetDetail"
-          component={AssetDetailScreen}
-          options={({ route }) => ({
-            title: route.params.asset.symbol,
-            headerStyle: {
-              backgroundColor: '#2196F3',
-            },
-            headerTintColor: '#fff',
-          })}
+          name="AiChat"
+          component={AiChatScreen}
+          options={{ title: 'AI Asistan' }}
         />
         <Stack.Screen
-          name="Trade"
-          component={TradeScreen}
-          options={({ route }) => ({
-            title: route.params.type === 'buy' ? 'Alış Emri' : 'Satış Emri',
-            headerStyle: {
-              backgroundColor: '#2196F3',
-            },
-            headerTintColor: '#fff',
-          })}
+          name="PrivacyPolicy"
+          component={PrivacyPolicyScreen}
+          options={{ title: 'Gizlilik Politikası' }}
         />
         <Stack.Screen
-          name="Analysis"
-          component={AnalysisScreen}
-          options={{
-            title: 'Performans Analizi',
-            headerStyle: {
-              backgroundColor: '#2196F3',
-            },
-            headerTintColor: '#fff',
-          }}
+          name="Terms"
+          component={TermsScreen}
+          options={{ title: 'Kullanım Koşulları' }}
         />
         <Stack.Screen
-          name="Bills"
-          component={BillsScreen}
-          options={{ title: 'Faturalar' }}
+          name="About"
+          component={AboutScreen}
+          options={{ title: 'Uygulama Hakkında' }}
+        />
+        <Stack.Screen
+          name="StockAccounts"
+          component={StockAccountsScreen}
+          options={{ title: 'Hisse Senetleri' }}
+        />
+        <Stack.Screen
+          name="StockTransactions"
+          component={StockTransactionsScreen}
+          options={{ title: 'İşlem Geçmişi' }}
+        />
+        <Stack.Screen
+          name="AddStockTransaction"
+          component={AddStockTransactionScreen}
+          options={{ title: 'Yeni İşlem Ekle' }}
+        />
+        <Stack.Screen
+          name="BudgetAnalysis"
+          component={BudgetAnalysisScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="PortfolioAiAnalysis"
+          component={PortfolioAiAnalysisScreen}
+          options={{ title: 'AI Portföy Analizi' }}
         />
       </Stack.Navigator>
     </NavigationContainer>
   );
 };
 
-export default AppNavigator; 
+export default AppNavigator;

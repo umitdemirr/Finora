@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TouchableOpacity,
   TextInput,
@@ -16,6 +15,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../../services/api';
 import { Picker } from '@react-native-picker/picker';
+import { RecentTransactionsStyles as styles } from '../../styles/RecentTransactionsStyles';
 
 export const handleAddTransaction = async (newTransaction, setModalVisible, setNewTransaction, fetchTransactions, account) => {
   try {
@@ -24,17 +24,178 @@ export const handleAddTransaction = async (newTransaction, setModalVisible, setN
       return;
     }
 
+    // UserId'yi al
+    const userId = await AsyncStorage.getItem('userId');
+    if (!userId) {
+      Alert.alert('Hata', 'Kullanıcı bilgileri alınamadı');
+      return;
+    }
+
     // Tutarı her zaman pozitif olarak gönder
     const amount = Math.abs(parseFloat(newTransaction.amount));
 
-    const response = await api.post('/BankTransaction/add', {
-      ...newTransaction,
+    // Kredi kartı seçiliyse işlem tipini Debit olarak değiştir
+    const transactionType = newTransaction.paymentType && newTransaction.paymentType.startsWith('CREDIT_') ? 'Debit' : newTransaction.transactionType;
+
+    // Kredi kartı işlemi ise limit kontrolü yap
+    let creditCard = null;
+    if (transactionType === 'Debit' && newTransaction.paymentType && newTransaction.paymentType.startsWith('CREDIT_')) {
+      const cardId = newTransaction.paymentType.split('_')[1];
+      
+      try {
+        // Kredi kartı bilgilerini al
+        const cardResponse = await api.get(`/CreditCard/getdetail?userId=${userId}`);
+        if (cardResponse.data.success && cardResponse.data.data) {
+          creditCard = cardResponse.data.data.find(card => card.id == cardId);
+          
+          if (creditCard) {
+            // Kullanılabilir limit kontrolü
+            if (amount > creditCard.avaliableLimit) {
+              Alert.alert(
+                'Limit Aşıldı', 
+                `Bu işlem kullanılabilir limitinizi aşmaktadır.\n\n` +
+                `İşlem tutarı: ₺${amount.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}\n` +
+                `Kullanılabilir limit: ₺${creditCard.avaliableLimit.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}\n` +
+                `Kart limiti: ₺${creditCard.limit.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`
+              );
+              return;
+            }
+          } else {
+            Alert.alert('Hata', 'Kredi kartı bilgileri bulunamadı');
+            return;
+          }
+        }
+      } catch (cardError) {
+        console.error('Kredi kartı bilgileri alınamadı:', cardError);
+        Alert.alert('Hata', 'Kredi kartı bilgileri kontrol edilemedi');
+        return;
+      }
+    }
+
+    // Gelir işlemlerinde kategoriyi otomatik "Banka Hesabı" olarak ayarla
+    let finalCategory = newTransaction.category;
+    if (newTransaction.transactionType === 'Gelir') {
+      finalCategory = 'Banka Hesabı';
+    }
+
+    // PaymentType'ı düzenle - eğer Gelir işlemiyse "Banka Hesabı" olarak ayarla
+    let finalPaymentType = newTransaction.paymentType;
+    if (newTransaction.transactionType === 'Gelir') {
+      finalPaymentType = 'Banka Hesabı';
+    } else if (!finalPaymentType || finalPaymentType === '') {
+      finalPaymentType = 'NAKIT';
+    } else if (finalPaymentType.startsWith('CREDIT_')) {
+      finalPaymentType = 'Kredi Kartı';
+    } else if (finalPaymentType.startsWith('BANK_')) {
+      finalPaymentType = 'Banka Kartı';
+    }
+
+    // Kart ile işlemde accountId'yi doğru belirle
+    let finalAccountId = newTransaction.accountId;
+    if (newTransaction.paymentType && newTransaction.paymentType.startsWith('BANK_')) {
+      finalAccountId = newTransaction.paymentType.split('_')[1];
+    } else if (newTransaction.paymentType && newTransaction.paymentType.startsWith('CREDIT_')) {
+      finalAccountId = creditCard.id;
+    }
+
+    const requestData = {
+      accountId: finalAccountId,
+      userId: parseInt(userId),
       amount: amount,
-      transactionType: newTransaction.transactionType // İşlem tipini transactionType olarak gönder
-    });
+      transactionType: transactionType,
+      paymentType: finalPaymentType,
+      type: finalCategory,
+      category: finalCategory,
+      description: newTransaction.description,
+      currency: newTransaction.currency,
+      date: newTransaction.date
+    };
+
+    // Sadece requestData'yı logla
+
+    const response = await api.post('/BankTransaction/add', requestData);
 
     if (response.data.success) {
-      Alert.alert('Başarılı', 'İşlem başarıyla eklendi');
+      // Kredi kartı limitini güncelle
+      if (creditCard && transactionType === 'Debit') {
+        try {
+          const newAvailableLimit = creditCard.avaliableLimit - amount;
+          
+          const updateData = {
+            id: creditCard.id,
+            userId: parseInt(userId),
+            bankId: creditCard.bankId,
+            name: creditCard.name,
+            provider: creditCard.provider,
+            number: creditCard.cardNumber,
+            expiryDate: creditCard.expiryDate,
+            cvv: creditCard.cvv,
+            limit: creditCard.limit,
+            avaliableLimit: newAvailableLimit,
+            statementClosingDate: creditCard.statementClosingDate,
+            isActive: creditCard.isActive,
+            createdAt: creditCard.createdAt,
+            updatedAt: creditCard.updatedAt
+          };
+
+          const updateResponse = await api.post('/CreditCard/update', updateData);
+          
+          if (updateResponse.data.success) {
+            Alert.alert(
+              'Başarılı', 
+              `İşlem başarıyla eklendi.\n\n` +
+              `${creditCard.name} kartının yeni kullanılabilir limiti: ₺${newAvailableLimit.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`
+            );
+          } else {
+            Alert.alert('Uyarı', 'İşlem eklendi ancak kredi kartı limiti güncellenemedi');
+          }
+        } catch (updateError) {
+          console.error('Kredi kartı güncelleme hatası:', updateError);
+          Alert.alert('Uyarı', 'İşlem eklendi ancak kredi kartı limiti güncellenemedi');
+        }
+      } else {
+        Alert.alert('Başarılı', 'İşlem başarıyla eklendi');
+      }
+      
+      // İşlem eklendikten sonra hesap bakiyesini güncelle
+      try {
+        if (account && account.accountId) {
+          // Yeni bakiyeyi hesapla
+          let newBalance = parseFloat(account.balance) || 0;
+          const oldBalance = newBalance;
+          
+          if (transactionType === 'Gelir') {
+            newBalance += amount;
+          } else if (transactionType === 'Gider') {
+            newBalance -= amount;
+          } else if (transactionType === 'Debit') {
+            // Debit işlemleri hesap bakiyesini etkilemez
+          }
+          
+          // Hesap bakiyesini API'de güncelle
+          const updateData = {
+            id: account.accountId,
+            userId: parseInt(userId),
+            bankId: account.bankId,
+            accountNo: account.iban,
+            currencyId: account.currencyId,
+            balance: newBalance,
+            name: account.accountName
+          };
+          
+          const updateResponse = await api.post('/BankAccount/update', updateData);
+          
+          if (updateResponse.data.success) {
+            // Local account objesini de güncelle
+            account.balance = newBalance;
+          } else {
+            console.error('Account balance update failed:', updateResponse.data);
+          }
+        }
+      } catch (balanceError) {
+        console.error('Error updating account balance:', balanceError);
+      }
+      
       setModalVisible(false);
       setNewTransaction({
         accountId: account.accountId,
@@ -73,13 +234,26 @@ const RecentTransactionsScreen = () => {
     description: '',
     date: new Date().toISOString(),
   });
+  const [bankCards, setBankCards] = useState([]);
+  const [creditCards, setCreditCards] = useState([]);
 
-  const transactionCategories = [
-    'Havale',
-    'EFT',
-    'Kredi Kartı',
-    'Nakit',
-    'Diğer'
+  const incomeCategories = [
+    'Maaş',
+    'Freelance',
+    'Yatırım Geliri',
+    'Kira Geliri',
+    'Diğer Gelir'
+  ];
+
+  const expenseCategories = [
+    'Market Alışverişi',
+    'Yemek',
+    'Ulaşım',
+    'Eğlence',
+    'Faturalar',
+    'Sağlık',
+    'Kira',
+    'Diğer Gider'
   ];
 
   const currencies = [
@@ -92,11 +266,13 @@ const RecentTransactionsScreen = () => {
     { id: 'all', label: 'Tümü' },
     { id: 'income', label: 'Gelirler' },
     { id: 'expense', label: 'Giderler' },
+    { id: 'debt', label: 'Borçlar' },
   ];
 
   useEffect(() => {
     fetchTransactions();
     fetchAccounts();
+    fetchCards();
   }, []);
 
   const fetchAccounts = async () => {
@@ -150,16 +326,61 @@ const RecentTransactionsScreen = () => {
     }
   };
 
+  const fetchCards = async () => {
+    try {
+      const userId = await AsyncStorage.getItem('userId');
+      if (!userId) {
+        Alert.alert('Hata', 'Kullanıcı bilgileri alınamadı');
+        return;
+      }
+
+      // Banka kartlarını getir
+      const bankResponse = await api.get(`/BankCard/getdetail?userId=${userId}`);
+      if (bankResponse.data.success && bankResponse.data.data) {
+        setBankCards(bankResponse.data.data);
+      }
+
+      // Kredi kartlarını getir
+      const creditResponse = await api.get(`/CreditCard/getdetail?userId=${userId}`);
+      if (creditResponse.data.success && creditResponse.data.data) {
+        setCreditCards(creditResponse.data.data);
+      }
+    } catch (error) {
+      console.error('Kart bilgileri alınamadı:', error);
+    }
+  };
+
   const handleAddTransactionLocal = () => {
+    // İşlem tipine göre kategori seçimini kontrol et
+    if (newTransaction.transactionType === 'Gelir' && !incomeCategories.includes(newTransaction.category)) {
+      Alert.alert('Hata', 'Lütfen gelir kategorisi seçin');
+      return;
+    }
+    if (newTransaction.transactionType === 'Gider' && !expenseCategories.includes(newTransaction.category)) {
+      Alert.alert('Hata', 'Lütfen gider kategorisi seçin');
+      return;
+    }
+    
+    // Kategori boş kontrolü
+    if (!newTransaction.category || newTransaction.category === '') {
+      Alert.alert('Hata', 'Lütfen kategori seçin');
+      return;
+    }
+    
     handleAddTransaction(newTransaction, setModalVisible, setNewTransaction, fetchTransactions, accounts[0]);
   };
 
-  const filteredTransactions = transactions.filter((transaction) => {
-    if (selectedFilter === 'all') return true;
-    if (selectedFilter === 'income') return transaction.transactionType === 'Gelir';
-    if (selectedFilter === 'expense') return transaction.transactionType === 'Gider';
-    return true;
+  const filteredTransactions = transactions.filter(t => {
+    if (selectedFilter === 'income') return t.transactionType === 'Gelir';
+    if (selectedFilter === 'expense') return t.transactionType === 'Gider';
+    if (selectedFilter === 'debt') return t.transactionType === 'Debit';
+    return t.transactionType !== 'Debit';
   });
+
+  // Bakiye hesaplamasında Debit işlemlerini dahil etme
+  const totalIncome = transactions.filter(t => t.transactionType === 'Gelir').reduce((sum, t) => sum + Number(t.amount), 0);
+  const totalExpense = transactions.filter(t => t.transactionType === 'Gider').reduce((sum, t) => sum + Number(t.amount), 0);
+  const balance = totalIncome - totalExpense;
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -404,27 +625,6 @@ const RecentTransactionsScreen = () => {
               </View>
 
               <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Kategori</Text>
-                <View style={styles.pickerContainer}>
-                  <Picker
-                    selectedValue={newTransaction.category}
-                    onValueChange={(value) =>
-                      setNewTransaction({ ...newTransaction, category: value })
-                    }
-                    style={styles.picker}
-                  >
-                    {transactionCategories.map((category) => (
-                      <Picker.Item
-                        key={category}
-                        label={category}
-                        value={category}
-                      />
-                    ))}
-                  </Picker>
-                </View>
-              </View>
-
-              <View style={styles.inputContainer}>
                 <Text style={styles.inputLabel}>İşlem Tipi</Text>
                 <View style={styles.typeSelector}>
                   <TouchableOpacity
@@ -437,6 +637,7 @@ const RecentTransactionsScreen = () => {
                       setNewTransaction({
                         ...newTransaction,
                         transactionType: 'Gelir',
+                        category: incomeCategories[0], // İlk kategoriyi varsayılan olarak seç
                       })
                     }
                   >
@@ -460,6 +661,7 @@ const RecentTransactionsScreen = () => {
                       setNewTransaction({
                         ...newTransaction,
                         transactionType: 'Gider',
+                        category: expenseCategories[0], // İlk kategoriyi varsayılan olarak seç
                       })
                     }
                   >
@@ -476,6 +678,85 @@ const RecentTransactionsScreen = () => {
                 </View>
               </View>
 
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Kategori</Text>
+                <View style={styles.pickerContainer}>
+                  <Picker
+                    selectedValue={newTransaction.category}
+                    onValueChange={(value) =>
+                      setNewTransaction({ ...newTransaction, category: value })
+                    }
+                    style={styles.picker}
+                  >
+                    <Picker.Item label="Kategori seçin..." value="" />
+                    {newTransaction.transactionType === 'Gelir' ? (
+                      incomeCategories.map((category) => (
+                        <Picker.Item
+                          key={category}
+                          label={category}
+                          value={category}
+                        />
+                      ))
+                    ) : (
+                      expenseCategories.map((category) => (
+                        <Picker.Item
+                          key={category}
+                          label={category}
+                          value={category}
+                        />
+                      ))
+                    )}
+                  </Picker>
+                </View>
+              </View>
+
+              {newTransaction.transactionType === 'Gider' && (
+                <View style={styles.inputContainer}>
+                  <Text style={styles.inputLabel}>Ödeme Yöntemi</Text>
+                  <View style={styles.pickerContainer}>
+                    <Picker
+                      selectedValue={newTransaction.paymentType}
+                      onValueChange={(value) =>
+                        setNewTransaction({ ...newTransaction, paymentType: value })
+                      }
+                      style={styles.picker}
+                    >
+                      <Picker.Item label="Ödeme yöntemi seçin..." value="" />
+                      
+                      {/* Banka Kartları */}
+                      {bankCards.map((card) => (
+                        <Picker.Item
+                          key={`bank_${card.id}`}
+                          label={`Banka Kartı - ${card.cardName || card.name}`}
+                          value={`BANK_${card.id}`}
+                        />
+                      ))}
+
+                      {/* Kredi Kartları */}
+                      {creditCards.map((card) => (
+                        <Picker.Item
+                          key={`credit_${card.id}`}
+                          label={`Kredi Kartı - ${card.name}`}
+                          value={`CREDIT_${card.id}`}
+                        />
+                      ))}
+
+                      {/* Nakit */}
+                      <Picker.Item
+                        label="Nakit"
+                        value="NAKIT"
+                      />
+
+                      {/* Havale/EFT */}
+                      <Picker.Item
+                        label="Havale/EFT"
+                        value="HAVALE"
+                      />
+                    </Picker>
+                  </View>
+                </View>
+              )}
+
               <TouchableOpacity
                 style={styles.submitButton}
                 onPress={handleAddTransactionLocal}
@@ -489,274 +770,4 @@ const RecentTransactionsScreen = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F5F5F5',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  headerCard: {
-    backgroundColor: '#2196F3',
-    padding: 20,
-    paddingTop: 40,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-  },
-  headerTitle: {
-    color: '#FFFFFF',
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  headerSubtitle: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    opacity: 0.8,
-    marginTop: 5,
-  },
-  filterSelector: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    padding: 15,
-    backgroundColor: '#FFFFFF',
-    marginTop: -10,
-    marginHorizontal: 15,
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  filterButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginHorizontal: 5,
-  },
-  filterButtonActive: {
-    backgroundColor: '#2196F3',
-  },
-  filterButtonText: {
-    color: '#666',
-    fontSize: 14,
-  },
-  filterButtonTextActive: {
-    color: '#FFFFFF',
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    margin: 15,
-    paddingHorizontal: 15,
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  searchIcon: {
-    marginRight: 10,
-  },
-  searchInput: {
-    flex: 1,
-    height: 45,
-    fontSize: 16,
-  },
-  transactionsList: {
-    flex: 1,
-    padding: 15,
-  },
-  transactionItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  transactionLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '25%',
-  },
-  transactionIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 8,
-  },
-  accountInfo: {
-    flex: 1,
-    marginLeft: 8,
-  },
-  accountName: {
-    fontSize: 12,
-    color: '#666',
-    flex: 1,
-  },
-  transactionCenter: {
-    flex: 1,
-    alignItems: 'center',
-    paddingHorizontal: 10,
-  },
-  transactionTitle: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#333',
-    textAlign: 'center',
-  },
-  transactionDate: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 2,
-    textAlign: 'center',
-  },
-  transactionAmount: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    width: '25%',
-    textAlign: 'right',
-  },
-  addButton: {
-    position: 'absolute',
-    right: 20,
-    bottom: 20,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#2196F3',
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-    maxHeight: '80%',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  closeButton: {
-    padding: 5,
-  },
-  modalBody: {
-    maxHeight: '100%',
-  },
-  inputContainer: {
-    marginBottom: 20,
-  },
-  inputLabel: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: '#F5F5F5',
-    borderRadius: 10,
-    padding: 15,
-    fontSize: 16,
-  },
-  typeSelector: {
-    flexDirection: 'row',
-    backgroundColor: '#F5F5F5',
-    borderRadius: 10,
-    padding: 5,
-  },
-  typeButton: {
-    flex: 1,
-    paddingVertical: 10,
-    alignItems: 'center',
-    borderRadius: 8,
-  },
-  typeButtonActive: {
-    backgroundColor: '#2196F3',
-  },
-  typeButtonText: {
-    fontSize: 16,
-    color: '#666',
-  },
-  typeButtonTextActive: {
-    color: '#FFFFFF',
-  },
-  submitButton: {
-    backgroundColor: '#2196F3',
-    borderRadius: 10,
-    padding: 15,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  submitButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  pickerContainer: {
-    backgroundColor: '#F5F5F5',
-    borderRadius: 10,
-    overflow: 'hidden',
-  },
-  picker: {
-    height: 50,
-    width: '100%',
-  },
-  typeLabel: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 4,
-    alignSelf: 'flex-start',
-    marginTop: 4,
-  },
-  typeLabelText: {
-    fontSize: 12,
-    fontWeight: '500',
-  },
-});
-
 export default RecentTransactionsScreen;
